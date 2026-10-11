@@ -638,3 +638,33 @@
   （OST_* 类别/View/Units/三坐标系 Survey Point 变换）；④ 几何=BRep 三角化黑盒，
   **纯 Go 不可重现完整几何**；⑤ 新路线 **C0**：获取 SDK 头+DLL → 复刻 TG_Db 分析方法论
 - RVT 路线图更新：C0（SDK，深度上限）+ C1/C2（待样例，不变）+ C3（收紧定性）
+
+## 二期 · 第 63 轮（拓扑桥 M1–M5 · go-dgn↔go-topo ★最新）
+
+- **仓库重组**：`godgn/` 上移至仓库根，module 更名 `github.com/flywave/go-dgn`，
+  推送 `git@github.com:flywave/go-dgn.git`（main 分支）
+- **D91**：go-topo 桥设计定案 `analysis/05-go-design/topo-bridge.md` —— 参照 IFC
+  导入模式（Reader→拓扑 Wire + Mesh 双出口）；中立 scene IR 解耦 50+ 解码器；
+  坐标契约（v7 走 TCB master 单位、v8 SetUnits 显式注入不猜）；弧细分 §6.4
+  弦高公式 `n = ceil(sweep/(2·acos(1−ε/r)))` clamp [3,256]
+- **M1**：P0 拆分收尾 —— `dgn/element/`（prim/geom/text/solid/cell/raster/table）+
+  `dgn/linkage/`（payload_geom/style/str/db），声明级 diff 零变化，六包绿
+- **M2**：`dgn/scene`（Kind/Point/Arc/Entity 零依赖 IR）+ `SceneV7` /
+  `SceneV7AtMaster` / `SceneV8` 构建器；金样：sample.dgn → 9138 entities、
+  7 kind 直方图（ComplexHeader19/Segment5814/Polyline2605/Arc317/Ellipse6/
+  CellDef338/CellRef39）、复杂组 ParentID 完整性、AtMaster 坐标映射
+- **M3**（go-topo faa6771c7）：`dgn.go` DgnReader —— v7 SceneV7AtMaster +
+  v8 ElementChunks 分块；Segment/Polyline→Edge 链 Wire、Arc→三点弧/整圆、
+  Ellipse→TopoMakeEllipse、quat 旋转纯 Go；金样 wires=8742；合成弧测试修
+  两处夹具 bug（VAX 双精度改用 V7PutDouble、TCB 字段偏移 1108 直索引）后过
+- **M4**（go-topo fab488719）：`dgn_mst.go` DgnToMst —— 每 wire 元素一个
+  MeshNode（EdgeGroup 连续索引边对），§6.4 弦高细分（椭圆取 min²/max 保守
+  曲率半径），默认 ε=0.1；金样 8742 nodes / 106214 verts / 97472 edges；
+  arcSegments 单测覆盖 clamp 与符号
+- **M5**（go-topo 4c8ff5826）：层级金样 —— ParentId>0 全解析（56 子→父必为
+  ComplexHeader）、CellDef 338 全命名（其中 223 个 type-2 带 placement
+  Transform）、CellRef 39 全命名；SetUnits scale 契约测试（unset=原样 UOR）
+- 六个 DGN 桥测试（TestDgnReader×3 / TestDgnToMst×2 / TestDgnHierarchy /
+  TestDgnSetUnits / TestArcSegments）全绿
+- 遗留：v8 全文件金样待真样例（并入 v8 样例固化批次）；Cone/Solid 网格出口、
+  CellRef 按名解析 CellDef → 二期
