@@ -628,3 +628,13 @@
   → linkage blob 迭代 → 表元素 → 样例金测试
 - [ ] 实现到对应层时再下钻：U7b(ElementChunk绑定) / U9(谓词) / U10(逐linkage字段) /  
   U5(显示头) / U8(校验和) / U4(v7 第二阶段)
+
+## RVT 侧记（资料摄入，不占 DGN 轮次）
+
+- **ODA BIM SDK 消费方代码摄入**：用户提供 3D Repo bim-ex `FileProcessorRvt.cpp`
+  （AGPL 2018，存档 `analysis/evidence/external/`）→ `04-rvt/oda-bim-clues.md`（R3–R10）
+- 关键结论：① RVT 读取 = 独立商业产品 **ODA BIM SDK**（OdBm*，Loader/Modeler 分模块）；
+  ② 版本门控实证（eUnsupportedFileFormat）；③ 对象模型镜像 Revit API
+  （OST_* 类别/View/Units/三坐标系 Survey Point 变换）；④ 几何=BRep 三角化黑盒，
+  **纯 Go 不可重现完整几何**；⑤ 新路线 **C0**：获取 SDK 头+DLL → 复刻 TG_Db 分析方法论
+- RVT 路线图更新：C0（SDK，深度上限）+ C1/C2（待样例，不变）+ C3（收紧定性）

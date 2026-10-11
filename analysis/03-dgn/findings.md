@@ -114,6 +114,7 @@
 |---|---|---|---|
 | R1 | 包内无任何 Revit/RVT 读写模块（bin 287 文件 + include ~1500 头 grep 无命中；仅 TD_BimDb/IFC/STEP） | E2 全量字符串检索 | 观察（边界=本包） |
 | R2 | ODA 生态读 RVT 需另行组件（不在本交付物内） | 推断（基于 R1） | 推断 |
+| R3+ | **已证实**：另行组件 = ODA BIM SDK（BimRv，OdBm* API）；外部消费方代码线索 R3–R10 → `../04-rvt/oda-bim-clues.md` | 用户提供 3D Repo FileProcessorRvt.cpp | 观察（外部源码） |
 
 ## 关键未知（建议用 REA record_unknown 跟踪）
 
