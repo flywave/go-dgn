@@ -1,0 +1,6 @@
+== ?oddgSetLinkageHandler@@YAP6A?AV?$OdSmartPtr@VOdDgAttributeLinkage@@@@PEBEK@ZGP6A?AV1@0K@Z@Z @ 1808bf840
+  [0] 48c1b70f28ec8348  data_48c1b70f28ec8348
+  [1] 8548007613fa0d8b  data_8548007613fa0d8b
+== s_?oddgSetLinkageHandler@@YAP6A?AV_180f17f3b @ 180f17f3b
+  [0] 7465536764646f3f  data_7465536764646f3f
+  [1] 486567616b6e694c  data_486567616b6e694c

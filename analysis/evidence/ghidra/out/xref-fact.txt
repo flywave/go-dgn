@@ -1,0 +1,6 @@
+target 1808bf800  func=FUN_1808bf800
+FROM 18107a7bc  in ?  type=DATA
+FROM 1801cb802  in FUN_1801cb730  type=UNCONDITIONAL_CALL
+FROM 1801cb4d8  in FUN_1801cb470  type=UNCONDITIONAL_CALL
+incoming=3
+outgoing=0

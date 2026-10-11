@@ -1,0 +1,9 @@
+target 1800035f0  func=OdDgElementResolver
+FROM 180de61fc  in ?  type=DATA
+FROM 1810234b0  in ?  type=DATA
+FROM Entry Point  in ?  type=EXTERNAL
+FROM 18000e97a  in createObject  type=UNCONDITIONAL_CALL
+FROM 1809da472  in FUN_1809d9c80  type=UNCONDITIONAL_CALL
+incoming=5
+TO   Stack[0x10]  data
+outgoing=1

@@ -1,0 +1,17 @@
+# Go
+*.test
+*.out
+
+# Large binaries / fixtures (not checked in)
+sample.dgn
+ODA-Parse-DWGs-main/
+
+# Evidence artifacts (too large for git)
+analysis/evidence/ghidra/project/
+
+# OS
+.DS_Store
+
+# Oversized decompilation dumps (>10MB; regenerable via Ghidra scripts)
+analysis/evidence/ghidra/out/*.allvft.txt
+analysis/evidence/ghidra/out/*.functions.tsv

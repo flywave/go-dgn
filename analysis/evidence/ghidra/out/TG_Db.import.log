@@ -1,0 +1,647 @@
+openjdk version "23.0.2" 2025-01-21
+OpenJDK Runtime Environment Homebrew (build 23.0.2)
+OpenJDK 64-Bit Server VM Homebrew (build 23.0.2, mixed mode)
+INFO  Using log config file: jar:file:/Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Framework/Generic/lib/Generic.jar!/generic.log4j.xml (LoggingInitialization)  
+INFO  Using log file: /Users/xuning/Library/ghidra/ghidra_12.1.4_PUBLIC/application.log (LoggingInitialization)  
+INFO  Loading user preferences: /Users/xuning/Library/ghidra/ghidra_12.1.4_PUBLIC/preferences (Preferences)  
+INFO  Searching for classes... (ClassSearcher)  
+INFO  Class search complete (563 ms) (ClassSearcher)  
+INFO  Initializing SSL Context (DefaultSSLContextInitializer)  
+INFO  Initializing Random Number Generator... (SecureRandomFactory)  
+INFO  Random Number Generator initialization complete: NativePRNGNonBlocking (SecureRandomFactory)  
+INFO  Trust manager disabled, cacerts have not been set (DefaultTrustManagerFactory)  
+INFO  Starting cache cleanup: /var/tmp/xuning-ghidra/fscache2 (FileCacheMaintenanceDaemon)  
+INFO  Finished cache cleanup, estimated storage used: 0 (FileCacheMaintenanceDaemon)  
+INFO  Headless startup complete (1205 ms) (AnalyzeHeadless)  
+INFO  Class searcher loaded 59 extension points (20 false positives) (ClassSearcher)  
+INFO  HEADLESS Script Paths:
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/FunctionID/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/SwiftDemangler/ghidra_scripts
+    /Users/xuning/Work/go-dgn/analysis/evidence/ghidra/scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/SystemEmulation/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/BSim/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/Decompiler/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/PyGhidra/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Processors/Atmel/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/Base/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Debug/Debugger-rmi-trace/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/VersionTracking/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Processors/DATA/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/BytePatterns/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/WildcardAssembler/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Debug/Debugger/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/FileFormats/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/PDB/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Processors/8051/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/GnuDemangler/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Processors/JVM/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Processors/PIC/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/DecompilerDependent/ghidra_scripts
+    /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/MicrosoftCodeAnalyzer/ghidra_scripts (HeadlessAnalyzer)  
+INFO  HEADLESS: execution starts (HeadlessAnalyzer)  
+INFO  Creating project: /Users/xuning/Work/go-dgn/analysis/evidence/ghidra/project/goDgn (HeadlessAnalyzer)  
+INFO  Creating project: /Users/xuning/Work/go-dgn/analysis/evidence/ghidra/project/goDgn (DefaultProject)  
+INFO  REPORT: Processing input files:  (HeadlessAnalyzer)  
+INFO       project: /Users/xuning/Work/go-dgn/analysis/evidence/ghidra/project/goDgn (HeadlessAnalyzer)  
+INFO  IMPORTING: file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TG_Db_25.4_lic16.tx (HeadlessAnalyzer)  
+INFO  Using Loader: Portable Executable (PE) (ProgramLoader)  
+INFO  Using Language/Compiler: x86:LE:64:default:windows (ProgramLoader)  
+INFO  Using Library Search Path: [., /System/Library/dyld/dyld_shared_cache_arm64e, /System/Library/dyld/dyld_shared_cache_x86_64, /System/Library/dyld/dyld_shared_cache_x86_64h, /System/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e, /System/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_x86_64, /System/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_x86_64h, /Users/xuning/Library/Java/Extensions, /Library/Java/Extensions, /Network/Library/Java/Extensions, /System/Library/Java/Extensions, /usr/lib/java] (ProgramLoader)  
+INFO  TLS callbacks at 180a241f0 (TLSDirectory)  
+WARN  Section .ps4 begins after end of file! (FileHeader)  
+WARN  Section .ps4 begins after end of file! (FileHeader)  
+WARN  Section .ps4 begins after end of file! (FileHeader)  
+WARN  Section .ps4 begins after end of file! (FileHeader)  
+INFO  TLS callbacks at 180096820 (TLSDirectory)  
+INFO  TLS callbacks at 1803b79e8 (TLSDirectory)  
+INFO  TLS callbacks at 1801af6c0 (TLSDirectory)  
+WARN  Section .ps4 begins after end of file! (FileHeader)  
+WARN  Section .ps4 begins after end of file! (FileHeader)  
+INFO  TLS callbacks at 1800a8f20 (TLSDirectory)  
+INFO  Removing 2 unused filesystems from cache (FileSystemInstanceManager)  
+INFO  Additional info:
+There were too many messages to display.
+2179 messages have been truncated.
+
+Loading file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TG_Db_25.4_lic16.tx?MD5=cd5fdf0284001fb66476f4afe17f406e...
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-CONVERT-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-HEAP-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-LOCALE-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-MATH-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-RUNTIME-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-STDIO-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-STRING-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library API-MS-WIN-CRT-TIME-L1-1-0.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library GDI32.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library KERNEL32.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library MSVCP140.DLL...
+Library not found.
+------------------------------------------------
+
+Searching 4 paths for library OLESS.DLL...
+Loading file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/OLESS.DLL?MD5=52ac7b0df9fcf97d181a062202b6ccd0...
+Created exports file: /Users/xuning/Library/ghidra/ghidra_12.1.4_PUBLIC/symbols/win64/oless.exports
+Library not saved to project.
+------------------------------------------------
+
+Searching 4 paths for library TD_ALLOC_25.4_LIC16.DLL...
+Loading file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TD_ALLOC_25.4_LIC16.DLL?MD5=b2b958f6105bc84b5b61877704e1bee0...
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800025a0: Conflicting data exists at address 180002598 to 18000268b
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800025e4: Conflicting data exists at address 180002598 to 18000268b
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 180002638: Conflicting data exists at address 180002598 to 18000268b
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 180002668: Conflicting data exists at address 180002710 to 180002711
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 180002678: Conflicting data exists at address 180002710 to 180002711
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800026ac: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800026ac: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 180002684: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800026ac: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800026ac: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800026e4: Conflicting data exists at address 180002710 to 180002711
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800025dc: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800025dc: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800025dc: Conflicting data exists at address 1800026b4 to 1800026bb
+[TD_ALLOC_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 180002660: Conflicting data exists at address 180002598 to 18000268b
+Created exports file: /Users/xuning/Library/ghidra/ghidra_12.1.4_PUBLIC/symbols/win64/td_alloc_25.4_lic16.exports
+Library not saved to project.
+------------------------------------------------
+
+Searching 4 paths for library TD_DBROOT_25.4_LIC16.DLL...
+Loading file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TD_DBROOT_25.4_LIC16.DLL?MD5=8d41d8c9ebcba89ae771a13e650b5568...
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e5c: Conflicting data exists at address 1800a6ea0 to 1800a6ea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e00: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f00: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f14: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a71d0: Conflicting data exists at address 1800a716c to 1800a726f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a724c: Conflicting data exists at address 1800a716c to 1800a726f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a707c: Conflicting data exists at address 1800a70a0 to 1800a70a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7508: Conflicting data exists at address 1800a74d0 to 1800a751b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a74b4: Conflicting data exists at address 1800a74d0 to 1800a751b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7644: Conflicting data exists at address 1800a765c to 1800a76c3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a75c4: Conflicting data exists at address 1800a762c to 1800a7633
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a75cc: Conflicting data exists at address 1800a762c to 1800a7633
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a75f4: Conflicting data exists at address 1800a762c to 1800a7633
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7318: Conflicting data exists at address 1800a7344 to 1800a734b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73bc: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a743c: Conflicting data exists at address 1800a7470 to 1800a7477
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a83d8: Conflicting data exists at address 1800a8410 to 1800a8417
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7678: Conflicting data exists at address 1800a76d0 to 1800a76d7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8140: Conflicting data exists at address 1800a8150 to 1800a8197
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8108: Conflicting data exists at address 1800a812c to 1800a8133
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a80f8: Conflicting data exists at address 1800a80e4 to 1800a8107
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8084: Conflicting data exists at address 1800a8070 to 1800a80bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a804c: Conflicting data exists at address 1800a8070 to 1800a80bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8060: Conflicting data exists at address 1800a8070 to 1800a80bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a768c: Conflicting data exists at address 1800a765c to 1800a76c3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8028: Conflicting data exists at address 1800a7fdc to 1800a804b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8028: Conflicting data exists at address 1800a7fdc to 1800a804b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8028: Conflicting data exists at address 1800a7fdc to 1800a804b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8178: Conflicting data exists at address 1800a81c4 to 1800a81cb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7680: Conflicting data exists at address 1800a765c to 1800a76c3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7680: Conflicting data exists at address 1800a765c to 1800a76c3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7680: Conflicting data exists at address 1800a765c to 1800a76c3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a772c: Conflicting data exists at address 1800a77a4 to 1800a77f7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8318: Conflicting data exists at address 1800a8308 to 1800a8399
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a834c: Conflicting data exists at address 1800a8308 to 1800a8399
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8354: Conflicting data exists at address 1800a8308 to 1800a8399
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8368: Conflicting data exists at address 1800a8308 to 1800a8399
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a837c: Conflicting data exists at address 1800a839c to 1800a83e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a838c: Conflicting data exists at address 1800a8308 to 1800a8399
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8094: Conflicting data exists at address 1800a8070 to 1800a80bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8454: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8444: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8b04: Conflicting data exists at address 1800a8b64 to 1800a8b6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8780: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8794: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a87a8: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a87b8: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8acc: Conflicting data exists at address 1800a8b64 to 1800a8b6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8adc: Conflicting data exists at address 1800a8b64 to 1800a8b6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8464: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a84f8: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8504: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8518: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8688: Conflicting data exists at address 1800a86d4 to 1800a86db
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8494: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8494: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8464: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a84e8: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a84b8: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a85f0: Conflicting data exists at address 1800a85dc to 1800a8613
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a862c: Conflicting data exists at address 1800a8660 to 1800a8667
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8638: Conflicting data exists at address 1800a8660 to 1800a8667
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8650: Conflicting data exists at address 1800a8660 to 1800a8667
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a87c8: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a87dc: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a87ec: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8800: Conflicting data exists at address 1800a876c to 1800a881b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a88c0: Conflicting data exists at address 1800a88e4 to 1800a88eb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a88d4: Conflicting data exists at address 1800a88e4 to 1800a88eb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a88b0: Conflicting data exists at address 1800a88e4 to 1800a88eb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8834: Conflicting data exists at address 1800a887c to 1800a8883
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8858: Conflicting data exists at address 1800a887c to 1800a8883
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a886c: Conflicting data exists at address 1800a887c to 1800a8883
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8810: Conflicting data exists at address 1800a8848 to 1800a884f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8824: Conflicting data exists at address 1800a8848 to 1800a884f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8470: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8484: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a89ec: Conflicting data exists at address 1800a891c to 1800a8a07
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f24: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8600: Conflicting data exists at address 1800a85dc to 1800a8613
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a860c: Conflicting data exists at address 1800a85dc to 1800a8613
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a892c: Conflicting data exists at address 1800a891c to 1800a8a07
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8574: Conflicting data exists at address 1800a85c8 to 1800a85cf
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73bc: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8a3c: Conflicting data exists at address 1800a8ab8 to 1800a8abb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8a70: Conflicting data exists at address 1800a8a50 to 1800a8a83
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a898c: Conflicting data exists at address 1800a891c to 1800a8a07
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73bc: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8464: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8ee4: Conflicting data exists at address 1800a8f2c to 1800a8f33
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8f6c: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9004: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9010: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9038: Conflicting data exists at address 1800a9088 to 1800a908f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9060: Conflicting data exists at address 1800a9088 to 1800a908f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9004: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9160: Conflicting data exists at address 1800a9138 to 1800a91b3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a90b8: Conflicting data exists at address 1800a9110 to 1800a911f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9100: Conflicting data exists at address 1800a9110 to 1800a911f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7678: Conflicting data exists at address 1800a76d0 to 1800a76d7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8d48: Conflicting data exists at address 1800a8d08 to 1800a8e07
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8f08: Conflicting data exists at address 1800a8ef8 to 1800a8f0f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7678: Conflicting data exists at address 1800a76d0 to 1800a76d7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7678: Conflicting data exists at address 1800a76d0 to 1800a76d7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7644: Conflicting data exists at address 1800a765c to 1800a76c3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7678: Conflicting data exists at address 1800a76d0 to 1800a76d7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8f9c: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8fac: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8fc0: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8f84: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8e2c: Conflicting data exists at address 1800a8e34 to 1800a8e4f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7678: Conflicting data exists at address 1800a76d0 to 1800a76d7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8fd0: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8fe0: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8ff4: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a7678: Conflicting data exists at address 1800a76d0 to 1800a76d7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9314: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a93dc: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a93e4: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a93f8: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9450: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9184: Conflicting data exists at address 1800a9138 to 1800a91b3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8464: Conflicting data exists at address 1800a8434 to 1800a8523
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e3c: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a93dc: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9408: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a941c: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9430: Conflicting data exists at address 1800a9470 to 1800a947f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9440: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9230: Conflicting data exists at address 1800a929c to 1800a92a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9264: Conflicting data exists at address 1800a929c to 1800a92a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a919c: Conflicting data exists at address 1800a9138 to 1800a91b3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a93a0: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9368: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9378: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9390: Conflicting data exists at address 1800a9470 to 1800a947f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9170: Conflicting data exists at address 1800a9138 to 1800a91b3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9304: Conflicting data exists at address 1800a92f0 to 1800a9347
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9518: Conflicting data exists at address 1800a9540 to 1800a9543
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a94e4: Conflicting data exists at address 1800a9540 to 1800a9543
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a95e8: Conflicting data exists at address 1800a95d4 to 1800a964b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a957c: Conflicting data exists at address 1800a95c4 to 1800a95cb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9638: Conflicting data exists at address 1800a95d4 to 1800a964b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8f84: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9618: Conflicting data exists at address 1800a95d4 to 1800a964b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a95f8: Conflicting data exists at address 1800a95d4 to 1800a964b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a97cc: Conflicting data exists at address 1800a97b0 to 1800a9807
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a979c: Conflicting data exists at address 1800a97b0 to 1800a9807
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9724: Conflicting data exists at address 1800a97b0 to 1800a9807
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9d5c: Conflicting data exists at address 1800a9cac to 1800a9d9d
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9cd8: Conflicting data exists at address 1800a9cac to 1800a9d9d
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9af0: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9804: Conflicting data exists at address 1800a97b0 to 1800a9807
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9aa0: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fdc: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6fb4: Conflicting data exists at address 1800a7004 to 1800a700b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9a48: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9acc: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9b18: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9b60: Conflicting data exists at address 1800a9c0c to 1800a9c0f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9a48: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9b80: Conflicting data exists at address 1800a9b38 to 1800a9baf
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9a74: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9bac: Conflicting data exists at address 1800a9b38 to 1800a9baf
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9830: Conflicting data exists at address 1800a986c to 1800a9873
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9acc: Conflicting data exists at address 1800a9a1c to 1800a9b1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a98d0: Conflicting data exists at address 1800a98fc to 1800a9903
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9804: Conflicting data exists at address 1800a97b0 to 1800a9807
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9bdc: Conflicting data exists at address 1800a9c0c to 1800a9c0f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a995c: Conflicting data exists at address 1800a999c to 1800a99ab
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a84e8: Conflicting data exists at address 1800a8528 to 1800a852f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9e08: Conflicting data exists at address 1800a9ee4 to 1800a9ef3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a75c4: Conflicting data exists at address 1800a7604 to 1800a7613
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9dd0: Conflicting data exists at address 1800a9da8 to 1800a9e47
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a9de0: Conflicting data exists at address 1800a9da8 to 1800a9e47
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa000: Conflicting data exists at address 1800aa08c to 1800aa093
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa5e8: Conflicting data exists at address 1800aa5d8 to 1800aa67b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa600: Conflicting data exists at address 1800aa5d8 to 1800aa67b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa33c: Conflicting data exists at address 1800aa3f0 to 1800aa3f7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa210: Conflicting data exists at address 1800aa180 to 1800aa23f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa500: Conflicting data exists at address 1800aa56c to 1800aa573
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa4a0: Conflicting data exists at address 1800aa56c to 1800aa573
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa4d8: Conflicting data exists at address 1800aa47c to 1800aa517
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa4d8: Conflicting data exists at address 1800aa47c to 1800aa517
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa610: Conflicting data exists at address 1800aa5d8 to 1800aa67b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa770: Conflicting data exists at address 1800aa7cc to 1800aa7d3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa6d4: Conflicting data exists at address 1800aa698 to 1800aa743
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa874: Conflicting data exists at address 1800aa864 to 1800aa8df
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa8a0: Conflicting data exists at address 1800aa864 to 1800aa8df
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa88c: Conflicting data exists at address 1800aa864 to 1800aa8df
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a84e8: Conflicting data exists at address 1800a8528 to 1800a852f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab4ec: Conflicting data exists at address 1800ab4d8 to 1800ab55b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab500: Conflicting data exists at address 1800ab578 to 1800ab5b7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab510: Conflicting data exists at address 1800ab4d8 to 1800ab55b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aadf4: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a93dc: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab120: Conflicting data exists at address 1800ab190 to 1800ab193
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab164: Conflicting data exists at address 1800ab14c to 1800ab18b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aab50: Conflicting data exists at address 1800aaae4 to 1800aabe3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aab64: Conflicting data exists at address 1800aaae4 to 1800aabe3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa9c4: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa978: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa98c: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa9a0: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a75c4: Conflicting data exists at address 1800a7604 to 1800a7613
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aaa38: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aaa60: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aaa70: Conflicting data exists at address 1800aaad0 to 1800aaad7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab42c: Conflicting data exists at address 1800ab4d8 to 1800ab55b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab464: Conflicting data exists at address 1800ab440 to 1800ab4b3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab474: Conflicting data exists at address 1800ab4d8 to 1800ab55b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab054: Conflicting data exists at address 1800ab010 to 1800ab07f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aaaf4: Conflicting data exists at address 1800aaae4 to 1800aabe3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aab08: Conflicting data exists at address 1800aaae4 to 1800aabe3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aab74: Conflicting data exists at address 1800aac38 to 1800aac3f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aab88: Conflicting data exists at address 1800aaae4 to 1800aabe3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa9d4: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa9e8: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab22c: Conflicting data exists at address 1800ab1cc to 1800ab2bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aaec0: Conflicting data exists at address 1800aaed8 to 1800aaf2b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aafec: Conflicting data exists at address 1800ab010 to 1800ab07f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aae18: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aab18: Conflicting data exists at address 1800aaae4 to 1800aabe3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aab98: Conflicting data exists at address 1800aaae4 to 1800aabe3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa9f8: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aabe0: Conflicting data exists at address 1800aac38 to 1800aac3f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aabf0: Conflicting data exists at address 1800aac38 to 1800aac3f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aac04: Conflicting data exists at address 1800aac38 to 1800aac3f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab3ac: Conflicting data exists at address 1800ab440 to 1800ab4b3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab274: Conflicting data exists at address 1800ab1cc to 1800ab2bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab280: Conflicting data exists at address 1800ab1cc to 1800ab2bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab298: Conflicting data exists at address 1800ab1cc to 1800ab2bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab2b0: Conflicting data exists at address 1800ab1cc to 1800ab2bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab318: Conflicting data exists at address 1800ab300 to 1800ab3a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab32c: Conflicting data exists at address 1800ab300 to 1800ab3a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab33c: Conflicting data exists at address 1800ab300 to 1800ab3a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab34c: Conflicting data exists at address 1800ab300 to 1800ab3a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab35c: Conflicting data exists at address 1800ab300 to 1800ab3a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab36c: Conflicting data exists at address 1800ab300 to 1800ab3a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab380: Conflicting data exists at address 1800ab300 to 1800ab3a3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab244: Conflicting data exists at address 1800ab1cc to 1800ab2bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab250: Conflicting data exists at address 1800ab2c4 to 1800ab2cb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab264: Conflicting data exists at address 1800ab1cc to 1800ab2bb
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab398: Conflicting data exists at address 1800ab3d8 to 1800ab403
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aad84: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab174: Conflicting data exists at address 1800ab190 to 1800ab193
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6f5c: Conflicting data exists at address 1800a6ef4 to 1800a6f6b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aad28: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aad38: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aad50: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab520: Conflicting data exists at address 1800ab4d8 to 1800ab55b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab530: Conflicting data exists at address 1800ab4d8 to 1800ab55b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab54c: Conflicting data exists at address 1800ab4d8 to 1800ab55b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab55c: Conflicting data exists at address 1800ab578 to 1800ab5b7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aabd0: Conflicting data exists at address 1800aac18 to 1800aac1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a8f84: Conflicting data exists at address 1800a8f54 to 1800a9037
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aafc8: Conflicting data exists at address 1800ab010 to 1800ab07f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aae94: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a93dc: Conflicting data exists at address 1800a9354 to 1800a9453
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aae54: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aae6c: Conflicting data exists at address 1800aaed8 to 1800aaf2b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aae7c: Conflicting data exists at address 1800aadac to 1800aaea3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab498: Conflicting data exists at address 1800ab440 to 1800ab4b3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab5a0: Conflicting data exists at address 1800ab578 to 1800ab5b7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab5b4: Conflicting data exists at address 1800ab578 to 1800ab5b7
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ac05c: Conflicting data exists at address 1800ac050 to 1800ac09f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ac078: Conflicting data exists at address 1800ac050 to 1800ac09f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ac090: Conflicting data exists at address 1800ac050 to 1800ac09f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73d0: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a6e30: Conflicting data exists at address 1800a6e98 to 1800a6e9b
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a73bc: Conflicting data exists at address 1800a73dc to 1800a73e3
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800abfb4: Conflicting data exists at address 1800abf98 to 1800abfcf
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800abfc8: Conflicting data exists at address 1800abf98 to 1800abfcf
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800abffc: Conflicting data exists at address 1800abfec to 1800ac04f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ac014: Conflicting data exists at address 1800ac050 to 1800ac09f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ab5d0: Conflicting data exists at address 1800ab5c4 to 1800ab687
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800abf3c: Conflicting data exists at address 1800abf98 to 1800abfcf
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800ac4dc: Conflicting data exists at address 1800ac524 to 1800ac54f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800aa978: Conflicting data exists at address 1800aa9b0 to 1800aaa7f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800abf2c: Conflicting data exists at address 1800abf98 to 1800abfcf
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800a75c4: Conflicting data exists at address 1800a7604 to 1800a7613
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800abea8: Conflicting data exists at address 1800abf18 to 1800abf1f
+[TD_DBROOT_25.4_LIC16.DLL]: failed to create PEx64_UnwindInfo at 1800abee0: Conflicting data exists at address 1800abf18 to 1800abf1f
+ (ProgramLoader)  
+INFO  IMPORTING: Loaded 0 additional files (HeadlessAnalyzer)  
+INFO  ANALYZING all memory and code: file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TG_Db_25.4_lic16.tx (HeadlessAnalyzer)  
+WARN  Ignoring leading '_' chars on no-return name '___raise_securityfailure' specified in file: /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/Base/data/PEFunctionsThatDoNotReturn (NoReturnFunctionAnalyzer)  
+WARN  Ignoring leading '_' chars on no-return name '___report_rangecheckfailure' specified in file: /Users/xuning/tools/ghidra_12.1.4_PUBLIC/Ghidra/Features/Base/data/PEFunctionsThatDoNotReturn (NoReturnFunctionAnalyzer)  
+INFO  Skipping PDB processing: missing PDB information in program metadata (PdbUniversalAnalyzer)  
+INFO  hit non-returning function, restarting decompiler switch analyzer later (DecompilerSwitchAnalyzer)  
+INFO  Packed database cache: /var/tmp/xuning-ghidra/packed-db-cache (PackedDatabaseCache)  
+INFO  Unprocessed TypeDescriptor: enum OdResult (TypeDescriptorModel)  
+INFO  Unprocessed TypeDescriptor: enum OdResult (TypeDescriptorModel)  
+INFO  Unprocessed TypeDescriptor: enum OdResult (TypeDescriptorModel)  
+INFO  Unprocessed TypeDescriptor: enum OdResult (TypeDescriptorModel)  
+INFO  Applied data type archive: windows_vs12_64 (ApplyDataArchiveAnalyzer)  
+INFO  Applied data type archive: windows_vs12_64 (ApplyDataArchiveAnalyzer)  
+ERROR Could not create Data at address 1809f5a00 (DemangledVariable)  
+ERROR Could not create Data at address 1809f6a30 (DemangledVariable)  
+ERROR Could not create Data at address 1809f82a0 (DemangledVariable)  
+ERROR Could not create Data at address 1809fa0a0 (DemangledVariable)  
+ERROR Could not create Data at address 1809ff5e0 (DemangledVariable)  
+ERROR Could not create Data at address 180a0db50 (DemangledVariable)  
+ERROR Could not create Data at address 180a0df30 (DemangledVariable)  
+ERROR Could not create Data at address 180a14e10 (DemangledVariable)  
+ERROR Could not create Data at address 180a1ebf0 (DemangledVariable)  
+INFO  -----------------------------------------------------
+    ASCII Strings                              0.826 secs
+    Apply Data Archives                        0.222 secs
+    Call Convention ID                         0.264 secs
+    Call-Fixup Installer                       3.957 secs
+    Create Address Tables                      1.860 secs
+    Create Address Tables - One Time           0.944 secs
+    Create Function                            0.230 secs
+    Data Reference                             2.177 secs
+    Decompiler Switch Analysis                 7.386 secs
+    Decompiler Switch Analysis - One Time     27.430 secs
+    Demangler Microsoft                        2.081 secs
+    Disassemble Entry Points                  23.184 secs
+    Disassemble Entry Points - One Time        0.025 secs
+    Embedded Media                             0.066 secs
+    External Entry References                  0.090 secs
+    Function ID                                7.202 secs
+    Function Start Search                      0.195 secs
+    Non-Returning Functions - Discovered       5.026 secs
+    Non-Returning Functions - Known            0.057 secs
+    PDB Universal                              0.001 secs
+    Reference                                  1.159 secs
+    Scalar Operand References                  6.983 secs
+    Shared Return Calls                        1.630 secs
+    Stack                                     36.931 secs
+    Subroutine References                      1.150 secs
+    Subroutine References - One Time           0.009 secs
+    Windows x86 PE Exception Handling          0.071 secs
+    Windows x86 PE RTTI Analyzer              15.512 secs
+    Windows x86 Thread Environment Block (TEB) Analyzer     0.007 secs
+    WindowsResourceReference                   1.365 secs
+    x86 Constant Reference Analyzer           25.433 secs
+-----------------------------------------------------
+     Total Time   173 secs
+-----------------------------------------------------
+ (AutoAnalysisManager)  
+INFO  REPORT: Analysis succeeded for file: file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TG_Db_25.4_lic16.tx (HeadlessAnalyzer)  
+INFO  REPORT: Execute script: ExportFunctions.java '/Users/xuning/Work/go-dgn/analysis/evidence/ghidra/out/TG_Db.functions.tsv'  (HeadlessAnalyzer)  
+INFO  SCRIPT: /Users/xuning/Work/go-dgn/analysis/evidence/ghidra/scripts/ExportFunctions.java (HeadlessAnalyzer)  
+INFO  ExportFunctions.java> ExportFunctions: wrote 39674 functions to /Users/xuning/Work/go-dgn/analysis/evidence/ghidra/out/TG_Db.functions.tsv (GhidraScript)  
+INFO  ANALYZING changes made by post scripts: file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TG_Db_25.4_lic16.tx (HeadlessAnalyzer)  
+INFO  REPORT: Post-analysis succeeded for file: file:///Users/xuning/Work/go-dgn/ODA-Parse-DWGs-main/ODA/bin/TG_Db_25.4_lic16.tx (HeadlessAnalyzer)  
+INFO  /TG_Db_25.4_lic16.tx: file created (xuning) (LocalFileSystem)  
+INFO  REPORT: Save succeeded for: /TG_Db_25.4_lic16.tx (goDgn:/TG_Db_25.4_lic16.tx) (HeadlessAnalyzer)  
+INFO  REPORT: Import succeeded (HeadlessAnalyzer)  

@@ -1,0 +1,6 @@
+target 1804740d0  func=FUN_1804740d0
+FROM 1810577f4  in ?  type=DATA
+FROM 18046d850  in FUN_18046d840  type=UNCONDITIONAL_CALL
+incoming=2
+TO   Stack[0x8]  data
+outgoing=1

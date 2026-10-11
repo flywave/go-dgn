@@ -1,0 +1,51 @@
+package linkage
+
+var PrimaryIDs = map[uint16]string{
+	0x0000: "kDMRS",
+	0x0020: "kFRAMME",
+	0x0041: "kFillStyle",
+	0x0F81: "kBSI",
+	0x1971: "kXBASE",
+	0x3948: "kINFORMIX",
+	0x3A77: "kINGRES",
+	0x4F58: "kSYBASE",
+	0x4F5A: "kExternalMaterial",
+	0x5229: "kFeature",
+	0x522E: "kBREP",
+	0x562E: "kNoteLinkage",
+	0x56D0: "kDependency",
+	0x56D2: "kString",
+	0x56D3: "kBitMaskLinkage",
+	0x56D4: "kThickness",
+	0x56D5: "kDoubleArray",
+	0x56D8: "kAssocRegion",
+	0x56DA: "kSeedPoints",
+	0x56DD: "kFilterMember",
+	0x56DE: "kDimension",
+	0x56E3: "kXmlLinkage",
+	0x56E4: "kXData",
+	0x56E9: "kInfiniteLine",
+	0x56EA: "kSharedCellFlags",
+	0x56ED: "kSheetModel",
+	0x56EE: "kSheetScale",
+	0x56F1: "kReferenceAttachmentPath",
+	0x56F3: "kTextAnnotation",
+	0x5701: "kSheetModelEx",
+	0x5710: "kLevelMask",
+	0x5751: "kByteArray",
+	0x5800: "kOLEDB",
+	0x5801: "kDimTextStyle",
+	0x5810: "kTextIndentation",
+	0x5E62: "kODBC",
+	0x6091: "kORACLE",
+	0x71FB: "kRIS",
+	0x79F9: "kLStyleMod",
+	0x7D28: "kHatch",
+	0x80D4: "kTextStyle",
+	0xB01E: "kOLE",
+}
+
+func Name(id uint16) (string, bool) {
+	n, ok := PrimaryIDs[id]
+	return n, ok
+}

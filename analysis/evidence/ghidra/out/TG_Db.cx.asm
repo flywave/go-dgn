@@ -1,0 +1,20 @@
+== 18045e4b0  func=FUN_18045e4b0  body=[[18045e4b0, 18045e4f4]]
+  18045e4b0  MOV qword ptr [RSP + 0x8],RBX
+  18045e4b5  PUSH RDI
+  18045e4b6  SUB RSP,0x20
+  18045e4ba  MOV RAX,qword ptr [RDX]
+  18045e4bd  MOV RDI,RCX
+  18045e4c0  MOV RCX,RDX
+  18045e4c3  MOV RBX,RDX
+  18045e4c6  CALL qword ptr [RAX + 0xb0]
+  18045e4cc  MOV dword ptr [RDI + 0x240],EAX
+  18045e4d2  MOV RDX,RBX
+  18045e4d5  MOV RAX,qword ptr [RDI]
+  18045e4d8  MOV RCX,RDI
+  18045e4db  CALL qword ptr [RAX + 0x650]
+  18045e4e1  MOV RBX,qword ptr [RSP + 0x30]
+  18045e4e6  XOR EAX,EAX
+  18045e4e8  MOV byte ptr [RDI + 0x244],0x1
+  18045e4ef  ADD RSP,0x20
+  18045e4f3  POP RDI
+  18045e4f4  RET

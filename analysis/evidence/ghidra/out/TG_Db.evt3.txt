@@ -1,0 +1,7 @@
+== ELine2D  TD=180fe6a01
+  tdRefs=1
+  col@18035c4ea refs=0
+== ELineString2D  TD=null
+== EShape2D  TD=null
+== EArc2D  TD=null
+== EEllipse2D  TD=null

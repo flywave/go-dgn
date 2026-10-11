@@ -1,0 +1,116 @@
+== 1808bf690  func=FUN_1808bf690  body=[[1808bf690, 1808bf7fc]]
+  1808bf690  MOV qword ptr [RSP + 0x10],RBX
+  1808bf695  MOV qword ptr [RSP + 0x18],RSI
+  1808bf69a  MOV qword ptr [RSP + 0x20],RDI
+  1808bf69f  PUSH R14
+  1808bf6a1  SUB RSP,0x30
+  1808bf6a5  MOV R14,R9
+  1808bf6a8  MOVZX EDI,R8W
+  1808bf6ac  MOV RSI,RDX
+  1808bf6af  MOV RAX,qword ptr [RCX]
+  1808bf6b2  MOV RCX,qword ptr [RAX + 0x8]
+  1808bf6b6  MOV R10,RAX
+  1808bf6b9  CMP byte ptr [RCX + 0x19],0x0
+  1808bf6bd  JNZ 0x1808bf6d8
+  1808bf6bf  NOP
+  1808bf6c0  CMP word ptr [RCX + 0x20],DI
+  1808bf6c4  JNC 0x1808bf6cc
+  1808bf6c6  MOV RCX,qword ptr [RCX + 0x10]
+  1808bf6ca  JMP 0x1808bf6d2
+  1808bf6cc  MOV R10,RCX
+  1808bf6cf  MOV RCX,qword ptr [RCX]
+  1808bf6d2  CMP byte ptr [RCX + 0x19],0x0
+  1808bf6d6  JZ 0x1808bf6c0
+  1808bf6d8  XOR EBX,EBX
+  1808bf6da  CMP byte ptr [R10 + 0x19],BL
+  1808bf6de  JNZ 0x1808bf6ea
+  1808bf6e0  CMP DI,word ptr [R10 + 0x20]
+  1808bf6e5  LEA ECX,[RBX + 0x1]
+  1808bf6e8  JNC 0x1808bf6ec
+  1808bf6ea  MOV ECX,EBX
+  1808bf6ec  MOV R9,RAX
+  1808bf6ef  TEST CL,CL
+  1808bf6f1  CMOVNZ R9,R10
+  1808bf6f5  MOV qword ptr [RSP + 0x40],RBX
+  1808bf6fa  CMP R9,RAX
+  1808bf6fd  SETZ AL
+  1808bf700  TEST AL,AL
+  1808bf702  JNZ 0x1808bf743
+  1808bf704  MOV R8D,dword ptr [RSP + 0x60]
+  1808bf709  MOV RDX,R14
+  1808bf70c  LEA RCX,[RSP + 0x20]
+  1808bf711  CALL qword ptr [R9 + 0x28]
+  1808bf715  NOP
+  1808bf716  MOV RCX,qword ptr [RAX]
+  1808bf719  TEST RCX,RCX
+  1808bf71c  JZ 0x1808bf72d
+  1808bf71e  MOV RBX,RCX
+  1808bf721  MOV qword ptr [RSP + 0x40],RCX
+  1808bf726  MOV RAX,qword ptr [RCX]
+  1808bf729  CALL qword ptr [RAX + 0x20]
+  1808bf72c  NOP
+  1808bf72d  MOV RCX,qword ptr [RSP + 0x20]
+  1808bf732  TEST RCX,RCX
+  1808bf735  JZ 0x1808bf73e
+  1808bf737  MOV RAX,qword ptr [RCX]
+  1808bf73a  CALL qword ptr [RAX + 0x28]
+  1808bf73d  NOP
+  1808bf73e  TEST RBX,RBX
+  1808bf741  JNZ 0x1808bf790
+  1808bf743  MOV R9D,dword ptr [RSP + 0x60]
+  1808bf748  MOV R8,R14
+  1808bf74b  MOVZX EDX,DI
+  1808bf74e  LEA RCX,[RSP + 0x28]
+  1808bf753  CALL 0x1801c50b0
+  1808bf758  NOP
+  1808bf759  MOV RDI,qword ptr [RAX]
+  1808bf75c  TEST RDI,RDI
+  1808bf75f  JZ 0x1808bf77f
+  1808bf761  MOV RBX,qword ptr [RDI]
+  1808bf764  CALL 0x1800c75a0
+  1808bf769  MOV RDX,RAX
+  1808bf76c  MOV RCX,RDI
+  1808bf76f  CALL qword ptr [RBX + 0x8]
+  1808bf772  MOV RBX,RAX
+  1808bf775  TEST RAX,RAX
+  1808bf778  JZ 0x1808bf7ca
+  1808bf77a  MOV qword ptr [RSP + 0x40],RAX
+  1808bf77f  MOV RCX,qword ptr [RSP + 0x28]
+  1808bf784  TEST RCX,RCX
+  1808bf787  JZ 0x1808bf790
+  1808bf789  MOV RAX,qword ptr [RCX]
+  1808bf78c  CALL qword ptr [RAX + 0x28]
+  1808bf78f  NOP
+  1808bf790  MOV qword ptr [RSI],RBX
+  1808bf793  TEST RBX,RBX
+  1808bf796  JZ 0x1808bf7a2
+  1808bf798  MOV RAX,qword ptr [RBX]
+  1808bf79b  MOV RCX,RBX
+  1808bf79e  CALL qword ptr [RAX + 0x20]
+  1808bf7a1  NOP
+  1808bf7a2  TEST RBX,RBX
+  1808bf7a5  JZ 0x1808bf7b1
+  1808bf7a7  MOV RAX,qword ptr [RBX]
+  1808bf7aa  MOV RCX,RBX
+  1808bf7ad  CALL qword ptr [RAX + 0x28]
+  1808bf7b0  NOP
+  1808bf7b1  MOV RAX,RSI
+  1808bf7b4  MOV RBX,qword ptr [RSP + 0x48]
+  1808bf7b9  MOV RSI,qword ptr [RSP + 0x50]
+  1808bf7be  MOV RDI,qword ptr [RSP + 0x58]
+  1808bf7c3  ADD RSP,0x30
+  1808bf7c7  POP R14
+  1808bf7c9  RET
+  1808bf7ca  CALL 0x1800c75a0
+  1808bf7cf  NOP
+  1808bf7d0  MOV RBX,RAX
+  1808bf7d3  MOV RDX,qword ptr [RDI]
+  1808bf7d6  MOV RCX,RDI
+  1808bf7d9  CALL qword ptr [RDX + 0x18]
+  1808bf7dc  MOV RDX,RAX
+  1808bf7df  MOV R8,RBX
+  1808bf7e2  LEA RCX,[RSP + 0x20]
+  1808bf7e7  CALL 0x1809f0e3c
+  1808bf7ec  LEA RDX,[0x180de5310]
+  1808bf7f3  LEA RCX,[RSP + 0x20]
+  1808bf7f8  CALL 0x1809f2d38

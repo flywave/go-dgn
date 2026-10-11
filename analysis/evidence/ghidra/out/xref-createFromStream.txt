@@ -1,0 +1,10 @@
+target 1809eae90  func=createFromStream
+FROM 180dead74  in ?  type=DATA
+FROM 181088808  in ?  type=DATA
+FROM Entry Point  in ?  type=EXTERNAL
+FROM 18055017e  in oddgGetDocumentSummaryInformation  type=UNCONDITIONAL_CALL
+FROM 18055042e  in oddgGetSummaryInformation  type=UNCONDITIONAL_CALL
+FROM 1809d8c99  in FUN_1809d8c50  type=UNCONDITIONAL_CALL
+incoming=6
+TO   Stack[0x18]  data
+outgoing=1
