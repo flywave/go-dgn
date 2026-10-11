@@ -11,6 +11,7 @@ import (
 // convention documented in scene.Entity.Transform.
 func SceneV7(doc V7Document) []scene.Entity {
 	var out []scene.Entity
+	bsConsumed, bsCurves := assembleV7BSplines(doc.Elements, doc.Header.Is3D)
 	var walk func(nodes []V7Node, parent uint64)
 	walk = func(nodes []V7Node, parent uint64) {
 		for _, n := range nodes {
@@ -37,6 +38,9 @@ func SceneV7(doc V7Document) []scene.Entity {
 				e.Kind = scene.KindSegment
 				e.Points = []scene.Point{v7pt(pts[0]), v7pt(pts[1])}
 			case 4, 6, 11, 21:
+				if el.Type == 21 && bsConsumed[el.Offset] {
+					continue // pole element consumed by a type-27 curve
+				}
 				pts, err := ReadV7MultiPoint(el, doc.Header.Is3D)
 				if err != nil {
 					continue
@@ -44,6 +48,18 @@ func SceneV7(doc V7Document) []scene.Entity {
 				e.Kind = scene.KindPolyline
 				for _, p := range pts {
 					e.Points = append(e.Points, v7pt(p))
+				}
+			case 27:
+				a, ok := bsCurves[el.Offset]
+				if !ok {
+					continue
+				}
+				e.Kind = scene.KindBSplineCurve
+				e.Degree = a.degree
+				e.Knots = a.knots
+				e.Weights = a.weights
+				for _, p := range a.poles {
+					e.Points = append(e.Points, scene.Point{X: p.X, Y: p.Y, Z: p.Z})
 				}
 			case 16:
 				a, err := ReadV7Arc(el, doc.Header.Is3D)
@@ -367,4 +383,111 @@ func map3d(pts []element.Point3d) []scene.Point {
 		out[i] = pt3(p)
 	}
 	return out
+}
+
+// v7BSplineAssembly holds one assembled type-27 curve from its sibling
+// elements. v7 stores a B-spline curve as a run of adjacent elements —
+// header(27), interior knots(26), poles(21), optional weights(28) —
+// associated by file adjacency, not complex grouping (bit7 on the
+// siblings is only a "group member" annotation; D59). NumKnots ==
+// NumPoles − Order in every sample curve, i.e. the knot element holds
+// the INTERIOR knots of an open clamped spline (ODA DgBSplineCurve.h
+// L282: open curve knot count = poles + order).
+type v7BSplineAssembly struct {
+	poles   []V7PointF
+	knots   []float64 // full expanded vector: clamped ends + interior
+	weights []float64 // nil when non-rational (no type-28 sibling)
+	degree  int
+}
+
+// assembleV7BSplines pre-scans the flat element list, pairing each type-27
+// header with its adjacent knot/pole/weight siblings. On success the
+// siblings are marked consumed so the scene walk emits a single
+// KindBSplineCurve entity instead of a bare pole polyline. Failed
+// assemblies leave their siblings untouched (standalone type 21 stays a
+// polyline, matching GDAL's point-array treatment).
+func assembleV7BSplines(els []V7Element, is3d bool) (consumed map[int]bool, curves map[int]v7BSplineAssembly) {
+	consumed = map[int]bool{}
+	curves = map[int]v7BSplineAssembly{}
+	for i := 0; i < len(els); i++ {
+		if els[i].Type != 27 || els[i].Deleted {
+			continue
+		}
+		h, err := ReadV7BSplineCurveHeader(els[i])
+		if err != nil || h.Order < 2 || int(h.NumPoles) < int(h.Order) {
+			continue
+		}
+		var a v7BSplineAssembly
+		var interior []float64
+		var cand []int // follower indices pending consumption
+		ok := true
+		for j := i + 1; j < len(els) && j <= i+3; j++ {
+			if t := els[j].Type; t != 26 && t != 21 && t != 28 {
+				break // next logical element (e.g. the next curve header)
+			}
+			if els[j].Deleted {
+				ok = false
+				break
+			}
+			switch els[j].Type {
+			case 26:
+				if len(interior) != 0 || h.NumKnots == 0 {
+					ok = false
+					break
+				}
+				k, err := ReadV7KnotWeights(els[j])
+				if err != nil || len(k) != int(h.NumKnots) {
+					ok = false
+					break
+				}
+				interior = k
+				cand = append(cand, j)
+			case 21:
+				if len(a.poles) != 0 {
+					ok = false
+					break
+				}
+				p, err := ReadV7MultiPointF(els[j], is3d)
+				if err != nil || len(p) != int(h.NumPoles) {
+					ok = false
+					break
+				}
+				a.poles = p
+				cand = append(cand, j)
+			case 28:
+				if len(a.weights) != 0 {
+					ok = false
+					break
+				}
+				w, err := ReadV7KnotWeights(els[j])
+				if err != nil || len(w) != int(h.NumPoles) {
+					ok = false
+					break
+				}
+				a.weights = w
+				cand = append(cand, j)
+			}
+			if !ok {
+				break
+			}
+		}
+		if !ok || len(a.poles) != int(h.NumPoles) || len(interior) != int(h.NumKnots) {
+			continue
+		}
+		order := int(h.Order)
+		a.knots = make([]float64, 0, order+len(interior)+order)
+		for k := 0; k < order; k++ {
+			a.knots = append(a.knots, 0)
+		}
+		a.knots = append(a.knots, interior...)
+		for k := 0; k < order; k++ {
+			a.knots = append(a.knots, 1)
+		}
+		a.degree = order - 1
+		for _, j := range cand {
+			consumed[els[j].Offset] = true
+		}
+		curves[els[i].Offset] = a
+	}
+	return consumed, curves
 }

@@ -24,6 +24,7 @@ const (
 	KindCellDef            // cell/block definition with placement transform
 	KindCellRef            // shared-cell reference (name only)
 	KindComplexHeader      // complex group header (children carry geometry)
+	KindBSplineCurve       // B-spline curve (v7 type 27 + pole/knot siblings)
 )
 
 // String returns the kind name for debugging/golden tests.
@@ -51,6 +52,8 @@ func (k Kind) String() string {
 		return "CellRef"
 	case KindComplexHeader:
 		return "ComplexHeader"
+	case KindBSplineCurve:
+		return "BSplineCurve"
 	}
 	return fmt.Sprintf("Kind(%d)", uint8(k))
 }
@@ -83,9 +86,15 @@ type Entity struct {
 	Color     int32        // raw color index; -1 = unknown
 	Name      string       // cell / shared-cell name
 	Transform *[16]float64 // cell placement, column-major 4x4; nil otherwise
-	Points    []Point      // KindSegment/Polyline/PointString endpoints; KindCone centers; KindText origin
+	Points    []Point      // KindSegment/Polyline/PointString endpoints; KindCone centers; KindText origin; KindBSplineCurve poles
 	Radii     [2]float64   // KindCone: radius1, radius2
 	Arc       *Arc         // KindArc/KindEllipse
 	Text      string       // KindText
-	BBox      [2]Point     // raw-UOR header bbox (v7 only); zero when absent
+	// KindBSplineCurve (v7 type 27): Knots is the full expanded knot
+	// vector (order×start + interior + order×end, parametric domain);
+	// Weights nil = non-rational; Degree = order−1.
+	Knots   []float64
+	Weights []float64
+	Degree  int
+	BBox    [2]Point // raw-UOR header bbox (v7 only); zero when absent
 }

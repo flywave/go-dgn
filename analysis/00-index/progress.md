@@ -631,13 +631,19 @@
 
 ## RVT 侧记（资料摄入，不占 DGN 轮次）
 
+> **已迁移**：RVT 分析/实现整体迁至同级独立仓库 **`/Users/xuning/Work/go-rvt/`**
+> （module `github.com/flywave/go-rvt`）。本项目仅保留 `04-rvt/` 指引页；
+> RVT 专属测试（internal/cfb/rvt_sample_test.go）已移除。以下为迁移前记录：
+
 - **ODA BIM SDK 消费方代码摄入**：用户提供 3D Repo bim-ex `FileProcessorRvt.cpp`
-  （AGPL 2018，存档 `analysis/evidence/external/`）→ `04-rvt/oda-bim-clues.md`（R3–R10）
+  （AGPL 2018）→ 已随 RVT 迁至 `go-rvt/evidence/external/`（台账 R3–R10）
 - 关键结论：① RVT 读取 = 独立商业产品 **ODA BIM SDK**（OdBm*，Loader/Modeler 分模块）；
   ② 版本门控实证（eUnsupportedFileFormat）；③ 对象模型镜像 Revit API
   （OST_* 类别/View/Units/三坐标系 Survey Point 变换）；④ 几何=BRep 三角化黑盒，
-  **纯 Go 不可重现完整几何**；⑤ 新路线 **C0**：获取 SDK 头+DLL → 复刻 TG_Db 分析方法论
-- RVT 路线图更新：C0（SDK，深度上限）+ C1/C2（待样例，不变）+ C3（收紧定性）
+  **纯 Go 不可重现完整几何**
+- **迁库后新增（go-rvt/analysis/）**：BimRv Linux SDK 盘点（TB_Loader 管线/Format{Year}
+  模块族，R11–R13）+ 真实样例 CFB 实测（R14–R18：容器/压缩体系/BasicFileInfo TLV）——
+  详见 go-rvt `analysis/findings.md`
 
 ## 二期 · 第 63 轮（拓扑桥 M1–M5 · go-dgn↔go-topo ★最新）
 
@@ -668,3 +674,32 @@
   TestDgnSetUnits / TestArcSegments）全绿
 - 遗留：v8 全文件金样待真样例（并入 v8 样例固化批次）；Cone/Solid 网格出口、
   CellRef 按名解析 CellDef → 二期
+
+## 二期 · 第 64 轮（3D 元素补全：B 样条曲线组装 + 锥体网格 ★最新）
+
+- **动因**：桥此前只出线框类元素（线/折线/弧/椭圆）；sample.dgn（Is3D）中
+  **2522 条 B 样条曲线只以控制多边形折线出口**，BIM 导入需要真实 3D 曲线/体
+- **D92**：v7 B 样条存储结构定案 —— type27 头**不建复杂组**，与 knot(26)/pole(21)/
+  weight(28) 兄弟元按**文件相邻序**关联（bit7 仅为组成员标注，D59 语义再证）；
+  **num_knots = num_poles − order → 存的是内节点**，全向量 = order×0 + 内节点 +
+  order×1（ODA DgBSplineCurve.h L282 开曲线 knots=poles+order 互证；sample 2522 条
+  全为 order4/非有理/内节点∈(0,1) 严格递增，1 条 num_knots=0 亦吻合）
+- **godgn `dgn/scene`**：新增 `KindBSplineCurve` + Entity.Knots/Weights/Degree 字段；
+  `SceneV7` 预扫描组装 `assembleV7BSplines`（成功则兄弟元标记 consumed，21 不再
+  单独出 Polyline；组装失败回退 standalone 折线，与 GDAL 点阵处理一致）；
+  poles 走 ReadV7MultiPointF（A951 分数增量）；金样：实体总数 9138 不变，
+  Polyline 2605→83、+BSplineCurve 2522、nested 56 不变
+- **go-topo 桥**（7c091bbc0）：`GeomMakeBSplineCurve`（全向量→uniq+mults）→
+  精确 OCCT 边；DgnToMst 纯 Go de Boor 采样 n=clamp(2·poles,16,128)；
+  **KindCone 三角化**（64 侧+双盖=128 面/68 顶点，零半径端收锥尖）
+- **C++ 关键修复**：geometry_c_api.cc ① bspline 两函数 knots/mults 数组按独立
+  KnotCount 定长（旧版按 poles 定长→越界读）② **22 处 NCollection_Array1
+  `{0,n}` off-by-one**（(Lower,Upper) 语义 → 末位未初始化元素；BSpline 恒报
+  "Knots interval values too close"、Bezier 多出 (0,0,0) 极点静默污染）；
+  排查手法与教训记入 go-topo AGENTS.md
+- 金样：sample wires=8742（含 2522 条精确 B 样条 wire）、**Z 非零 wire 8646**
+  （3D 坐标直通证明）；DgnToMst 8742 nodes / 202059 verts / 193317 edges；
+  合成样例：B 样条夹持端点、锥体网格、SetUnits 契约全绿
+- 遗留：v8 B 样条/实体（KindSolid）映射待 v8 样例；18/19（3D surface/solid 复头）
+  与 24（B 样条曲面）解码头已有、scene 映射待样例；bezier 族修复无使用方金样回归
+  （仅 geometry_test/topo_test 覆盖）
