@@ -164,14 +164,20 @@ func SceneV7AtMaster(doc V7Document) []scene.Entity {
 
 // SceneV8 converts a parsed v8 element stream into scene entities. The
 // result is flat (no complex-group nesting yet — see topo-bridge M5);
-// Level carries the raw level entry id from the element header.
+// Level carries the raw level entry id from the element header. Type-27
+// B-spline curve headers assemble with their adjacent knot/pole records
+// into a single KindBSplineCurve entity (same adjacency rule as v7).
 func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 	parsed, err := ParseAll(space, d)
 	if err != nil {
 		return nil, err
 	}
+	bsConsumed, bsCurves := assembleV8BSplines(parsed)
 	var out []scene.Entity
-	for _, p := range parsed {
+	for i, p := range parsed {
+		if bsConsumed[i] {
+			continue
+		}
 		b, ok := p.Body.(*Body)
 		if !ok {
 			continue
@@ -181,6 +187,17 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 			Dim:   dimOf(p.Record.Ext != 0),
 			Level: int(p.Record.Subtype),
 			Color: -1,
+		}
+		if a, ok := bsCurves[i]; ok {
+			e.Kind = scene.KindBSplineCurve
+			e.Degree = a.degree
+			e.Knots = a.knots
+			e.Weights = a.weights
+			for _, pt := range a.poles {
+				e.Points = append(e.Points, pt)
+			}
+			out = append(out, e)
+			continue
 		}
 		switch v := b.Value.(type) {
 		case *element.Line:
@@ -278,6 +295,99 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 		out = append(out, e)
 	}
 	return out, nil
+}
+
+// v8BSplineAssembly is the v8 counterpart of v7BSplineAssembly: a type-27
+// header with adjacent knot (26), pole (21) and optional weight (28)
+// records in the same chunk. Unlike v7, the knot record already carries
+// the FULL knot vector (golden attach1: 21 knots = 17 poles + order 4,
+// unclamped), so no clamped-end expansion is applied. Header C is the
+// pole count (D99 write-side corroboration); header B is a slot-return
+// artifact, not a count — never validated against.
+type v8BSplineAssembly struct {
+	poles   []scene.Point
+	knots   []float64
+	weights []float64
+	degree  int
+}
+
+// assembleV8BSplines pairs type-27 headers with adjacent knot/pole/weight
+// records. The curve header's C u32 is the pole count (golden + write-side
+// verified, D99); the order is derived from knots = poles + order. Failed
+// assemblies leave their records untouched (poles stay a polyline, knots a
+// standalone array).
+func assembleV8BSplines(parsed []Parsed) (consumed map[int]bool, curves map[int]v8BSplineAssembly) {
+	consumed = map[int]bool{}
+	curves = map[int]v8BSplineAssembly{}
+	body := func(p Parsed) any {
+		if b, ok := p.Body.(*Body); ok {
+			return b.Value
+		}
+		return nil
+	}
+	for i, p := range parsed {
+		hc, ok := body(p).(*element.BSplineCurve)
+		if !ok || hc.C < 2 {
+			continue
+		}
+		var a v8BSplineAssembly
+		var cand []int
+		good := true
+		for j := i + 1; j < len(parsed) && j <= i+3; j++ {
+			t := parsed[j].Record.Type
+			if t != 26 && t != 21 && t != 28 {
+				break
+			}
+			switch v := body(parsed[j]).(type) {
+			case *element.BSplineArray:
+				if t == 26 && a.knots == nil {
+					a.knots = v.Values
+					cand = append(cand, j)
+				} else if t == 28 && a.weights == nil {
+					a.weights = v.Values
+					cand = append(cand, j)
+				} else {
+					good = false
+				}
+			case *element.LineString:
+				if t == 21 && a.poles == nil {
+					for _, pt := range v.Points {
+						a.poles = append(a.poles, pt2(pt))
+					}
+					cand = append(cand, j)
+				} else {
+					good = false
+				}
+			case *element.LineString3d:
+				if t == 21 && a.poles == nil {
+					for _, pt := range v.Points {
+						a.poles = append(a.poles, pt3(pt))
+					}
+					cand = append(cand, j)
+				} else {
+					good = false
+				}
+			default:
+				good = false
+			}
+			if !good {
+				break
+			}
+		}
+		if !good || len(a.poles) != int(hc.C) || a.knots == nil {
+			continue
+		}
+		order := len(a.knots) - len(a.poles)
+		if order < 2 {
+			continue
+		}
+		a.degree = order - 1
+		for _, j := range cand {
+			consumed[j] = true
+		}
+		curves[i] = a
+	}
+	return consumed, curves
 }
 
 func toMaster(tcb *V7TCB, p scene.Point) scene.Point {
@@ -491,4 +601,61 @@ func assembleV7BSplines(els []V7Element, is3d bool) (consumed map[int]bool, curv
 		curves[els[i].Offset] = a
 	}
 	return consumed, curves
+}
+
+// SceneV8ModelAtMaster builds the scene entities of one v8 model and maps
+// raw UOR coordinates to master units through the document resolution
+// (master = UOR / UorPerMaster; D104). Entities keep their model-relative
+// placement; the real size of one master unit comes from the model's
+// working set (V8Model.Settings.SubUnitsPerUor × sub-unit scale).
+func SceneV8ModelAtMaster(doc *V8Document, m *V8Model) ([]scene.Entity, error) {
+	scale := 1.0
+	if doc.UorPerMaster > 0 {
+		scale = 1.0 / doc.UorPerMaster
+	}
+	var out []scene.Entity
+	for path, ch := range doc.Chunks {
+		if chunkParent(path) != m.Storage+"/"+StorageGraphics {
+			continue
+		}
+		ents, err := SceneV8(ch.Space, Dir{Base: 0, Offsets: ch.Offsets})
+		if err != nil {
+			return out, err
+		}
+		for i := range ents {
+			scaleEntity(&ents[i], scale)
+		}
+		out = append(out, ents...)
+	}
+	return out, nil
+}
+
+func scaleEntity(e *scene.Entity, k float64) {
+	if k == 1 {
+		return
+	}
+	for j := range e.Points {
+		e.Points[j].X *= k
+		e.Points[j].Y *= k
+		e.Points[j].Z *= k
+	}
+	if e.Arc != nil {
+		e.Arc.Center.X *= k
+		e.Arc.Center.Y *= k
+		e.Arc.Center.Z *= k
+		e.Arc.PrimaryAxis *= k
+		e.Arc.SecondaryAxis *= k
+	}
+	e.Radii[0] *= k
+	e.Radii[1] *= k
+	for j := range e.BBox {
+		e.BBox[j].X *= k
+		e.BBox[j].Y *= k
+		e.BBox[j].Z *= k
+	}
+	if e.Transform != nil {
+		e.Transform[12] *= k
+		e.Transform[13] *= k
+		e.Transform[14] *= k
+	}
 }

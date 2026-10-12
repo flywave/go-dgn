@@ -84,6 +84,17 @@ func ReadBSplineArray(r *le.Reader) (*BSplineArray, error) {
 	return a, nil
 }
 
+// BSplineCurve is the type-27 curve header, 3×u32 (D99 read/write cross
+// evidence, FUN_1803b8690/FUN_1803b8720):
+//   - A: stored field at impl+0x240, plain round-trip (getter semantics TBD);
+//     golden attach A=2.
+//   - B: written as the return value of vtable slot +0x408 opened on the
+//     POLE element (+0x250) — in 25.4 that slot resolves to
+//     getGradientFill, so the on-disk value is not a pole count
+//     (golden 0x01620162). Unreliable; do not consume.
+//   - C: same slot on the KNOT element (+0x258); empirically equals the
+//     POLE count (golden 17 = knots 21 − order 4), corroborated by the
+//     write-side structure.
 type BSplineCurve struct {
 	A uint32
 	B uint32
@@ -91,8 +102,8 @@ type BSplineCurve struct {
 }
 
 // ReadBSplineCurve decodes the type-27 curve header: EBSpline2D/3D fields
-// reader `1803b8690` = rdInt32×3 (D71 write/read cross-validation; the
-// 9×u32 function1803e9bc0 belongs to the surface impl, not the curve).
+// reader `1803b8690` = rdInt32×3 (D71/D99; the 9×u32 function 1803e9bc0
+// belongs to the surface impl, not the curve).
 func ReadBSplineCurve(r *le.Reader) (*BSplineCurve, error) {
 	c := &BSplineCurve{A: r.U32(), B: r.U32(), C: r.U32()}
 	return c, r.Err()

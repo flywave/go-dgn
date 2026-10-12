@@ -5,6 +5,12 @@ type ChunkIndex struct {
 	Offsets []uint32
 }
 
+// BuildChunkIndex derives the element-record offset array of an
+// uncompressed element chunk ([u32 count][u32 flags][records…]) by the
+// incremental rule (D31): off[0]=8, off[i+1]=off[i]+u32@(off_i+8)*2+4; the
+// walk stops at a non-zero leading u32 (start of the trailing heap) or at
+// the buffer end. Empty slots are legal 4-byte records (type 0, B=0), so
+// the minimum span is 4 — real ODA files carry them.
 func BuildChunkIndex(chunk []byte) ChunkIndex {
 	var idx ChunkIndex
 	if len(chunk) < 8 {
@@ -21,7 +27,7 @@ func BuildChunkIndex(chunk []byte) ChunkIndex {
 			break
 		}
 		size := leU32(chunk[pos+8:])*2 + 4
-		if size < 12 || uint64(pos)+uint64(size) > uint64(len(chunk)) {
+		if size < 4 || uint64(pos)+uint64(size) > uint64(len(chunk)) {
 			break
 		}
 		idx.Offsets = append(idx.Offsets, pos)

@@ -219,7 +219,9 @@ func ReadV7Text(el V7Element, is3d bool) (V7Text, error) {
 	off, need := 56, 60
 	nChar := 54
 	if is3d {
-		off, need, nChar = 72, 76, 70
+		// 74 = string start (72) + 2 bytes: minimal single-char texts
+		// ("X"/"Y"/"Z" ACS labels in v7_textformat) end right there.
+		off, need, nChar = 72, 74, 70
 	}
 	if len(el.Body) < need {
 		return t, fmt.Errorf("dgn/v7: text body %d < %d", len(el.Body), need)

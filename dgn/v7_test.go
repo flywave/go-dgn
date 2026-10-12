@@ -135,3 +135,57 @@ func TestReadV7Seed2D(t *testing.T) {
 		t.Fatal("no elements")
 	}
 }
+
+// TestV7TextFormatGolden locks the ExDgnTextFormat sample: a real v7 file
+// whose 20 text elements (view labels, ACS axis trio "X"/"Y"/"Z", and
+// multibyte codepage samples) all decode — closing the "v7 TEXT had no
+// real-sample coverage" gap (D58/D87 residuals).
+func TestV7TextFormatGolden(t *testing.T) {
+	b, err := os.ReadFile("testdata/v7_textformat.dgn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := ParseV7Header(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !h.Is3D {
+		t.Fatal("expected 3D file")
+	}
+	els, err := ReadV7Elements(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(els) != 45 {
+		t.Fatalf("elements = %d, want 45", len(els))
+	}
+	hist := map[byte]int{}
+	var texts []string
+	for _, e := range els {
+		hist[e.Type]++
+		if e.Type == 17 {
+			txt, err := ReadV7Text(e, h.Is3D)
+			if err != nil {
+				t.Fatalf("text @%d: %v", e.Offset, err)
+			}
+			texts = append(texts, txt.String)
+		}
+	}
+	wantHist := map[byte]int{
+		3: 3, 4: 3, 5: 1, 8: 1, 9: 2, 10: 1, 17: 20, 19: 1, 66: 13,
+	}
+	for k, v := range wantHist {
+		if hist[k] != v {
+			t.Errorf("type %d: %d, want %d", k, hist[k], v)
+		}
+	}
+	wantTexts := []string{"Top", "Front", "Right", "Bottom", "Back", "Left", "X", "Y", "Z"}
+	for i, w := range wantTexts {
+		if texts[i] != w {
+			t.Errorf("text[%d] = %q, want %q", i, texts[i], w)
+		}
+	}
+	if len(texts) != 20 {
+		t.Fatalf("texts = %d, want 20", len(texts))
+	}
+}

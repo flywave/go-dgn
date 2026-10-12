@@ -1,6 +1,7 @@
 package element
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	"github.com/flywave/go-dgn/internal/le"
@@ -10,10 +11,13 @@ import (
 // multiline styles, DStrings and table headers (D72/D73/D79).
 
 // MeshHeader is kTypeMesh(105)'s base fields reader (EMeshHeader
-// `180185700`): a single u32 (subtype discriminator [?]) + the raw
-// remainder — subtype-specific variants (FaceLoops/TriangleList/…) read
-// more fields; capturing Raw keeps the wildcard lossless until each
-// variant is pinned (D73).
+// `180185700`): a single u32 + the raw remainder. The element header Sub
+// (dispatch variant) is the mesh STYLE (E1 DgMesh.h StyleValues, D106):
+// 1=FaceLoops, 2=PointCloud, 3=TriangleList, 4=QuadList, 5=TriangleGrid,
+// 6=QuadGrid. The decompiled dgnInFields (D106) reads only this one i32 on
+// the file-filer path — the vertex/face geometry lives outside the header
+// body (child records, like Solid/Surface; layout unpinned — D106
+// residuals), so Raw stays the lossless carrier.
 type MeshHeader struct {
 	A   uint32
 	Raw []byte
@@ -416,12 +420,80 @@ func ReadDString(r *le.Reader) (*DString, error) {
 	return s, nil
 }
 
+// TableEntry is the catch-all type-95 table row: the body is the header
+// rest blob. Row payloads are table-specific; when the blob carries the
+// common trailing name record it is decoded into Name/Number/Flags
+// (v8 golden evidence, D101).
 type TableEntry struct {
 	Raw []byte
+
+	// Name is the trailing record [u32 ts][u32 1][u32 len][ascii name],
+	// NUL-terminated, found on Level rows ("Default", "XRef Level 1", …)
+	// and other named tables. Empty when the row has no such tail.
+	Name string
+	// Number is u32@0 of the blob (row sequence / entry number).
+	Number uint32
+	// Flags is u32@8 of the blob.
+	Flags uint32
 }
 
 func ReadTableEntry(r *le.Reader) (*TableEntry, error) {
-	return &TableEntry{Raw: r.Rest()}, r.Err()
+	t := &TableEntry{Raw: r.Rest()}
+	t.Number = binary.LittleEndian.Uint32(t.Raw[0:4])
+	if len(t.Raw) >= 12 {
+		t.Flags = binary.LittleEndian.Uint32(t.Raw[8:12])
+	}
+	t.Name, _ = TrailingASCIIName(t.Raw)
+	return t, r.Err()
+}
+
+// trailingASCIIName decodes the common name tail [u32 ts][u32 1]
+// [u32 len][len ASCII bytes][NUL][zero padding], scanned backwards from
+// the blob end. The marker u32 is 1 in every golden row and serves as the
+// discriminator; the record must sit at the very end (zero padding only).
+func TrailingASCIIName(raw []byte) (string, bool) {
+	for i := len(raw) - 12; i >= 0; i-- {
+		l := int(binary.LittleEndian.Uint32(raw[i+8:]))
+		if l <= 0 || l > 512 || i+12+l > len(raw) {
+			continue
+		}
+		if binary.LittleEndian.Uint32(raw[i+4:]) != 1 {
+			continue
+		}
+		// The record must end the blob. After the name either the NUL (with
+		// any amount of zero padding — legacy writers pad past 4-byte
+		// alignment) or nothing at all (the legacy writer drops the NUL
+		// when aligning the blob, e.g. "XRef Level 1" rows).
+		end := i + 12 + l
+		if end < len(raw) {
+			if raw[end] != 0 {
+				continue
+			}
+			zeros := true
+			for _, c := range raw[end+1:] {
+				if c != 0 {
+					zeros = false
+					break
+				}
+			}
+			if !zeros {
+				continue
+			}
+		}
+		name := raw[i+12 : i+12+l]
+		ok := true
+		for _, c := range name {
+			if c < 0x20 || c > 0x7e {
+				ok = false
+				break
+			}
+		}
+		if !ok {
+			continue
+		}
+		return string(name), true
+	}
+	return "", false
 }
 
 type TableLevelHeader struct {

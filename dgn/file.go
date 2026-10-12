@@ -58,19 +58,22 @@ func OpenBytes(b []byte) (*File, error) {
 		return nil, err
 	}
 	f := &File{c: c}
-	for _, n := range c.Names() {
-		sz, _ := c.Size(n)
-		f.streams = append(f.streams, StreamInfo{Name: n, Size: sz, Kind: kindOf(n)})
+	for _, e := range c.Streams() {
+		f.streams = append(f.streams, StreamInfo{Name: e.Path, Size: e.Size, Kind: kindOf(e.Path)})
 	}
 	sort.Slice(f.streams, func(i, j int) bool { return f.streams[i].Name < f.streams[j].Name })
 	return f, nil
 }
 
 func kindOf(name string) ChunkKind {
-	if strings.HasPrefix(name, string(ElementChunkPrefix)) {
+	base := name
+	if i := strings.LastIndexByte(base, '/'); i >= 0 {
+		base = base[i+1:]
+	}
+	if strings.HasPrefix(base, string(ElementChunkPrefix)) {
 		return ChunkElement
 	}
-	if strings.HasPrefix(name, "Dgn~") || strings.HasPrefix(name, "Oda~") {
+	if strings.HasPrefix(base, "Dgn~") || strings.HasPrefix(base, "Oda~") {
 		return ChunkZip
 	}
 	return ChunkOther

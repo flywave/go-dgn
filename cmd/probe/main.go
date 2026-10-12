@@ -38,9 +38,51 @@ func probeV8(p string) {
 		fmt.Printf("%s: ERROR %v\n", p, err)
 		return
 	}
-	fmt.Printf("%s: DGN v8 (CFB) — %d streams:\n", p, len(f.Streams()))
-	for _, s := range f.Streams() {
-		fmt.Printf("  %-28s %10d  [%s]\n", s.Name, s.Size, s.Kind)
+	doc, err := f.V8()
+	if err != nil {
+		fmt.Printf("%s: DGN v8 (CFB) — %d 流（文档解码失败: %v）:\n", p, len(f.Streams()), err)
+		for _, s := range f.Streams() {
+			fmt.Printf("  %-44s %10d  [%s]\n", s.Name, s.Size, s.Kind)
+		}
+		return
+	}
+	fmt.Printf("%s: DGN v8 — revision=%d, 模型 %d, 表级元素 %d, chunk %d\n",
+		p, doc.Header.Revision, len(doc.Models), len(doc.Tables), len(doc.Chunks))
+	for _, w := range doc.Warnings {
+		fmt.Printf("  警告: %v\n", w)
+	}
+	for _, m := range doc.Models {
+		kinds := map[string]int{}
+		for _, el := range m.Elements {
+			if b, ok := el.Body.(*dgn.Body); ok {
+				kinds[fmt.Sprintf("%T", b.Value)]++
+			} else {
+				kinds["?"]++
+			}
+		}
+		name := m.Name
+		if m.Short != "" && m.Short != m.Name {
+			name = fmt.Sprintf("%s (%s)", m.Name, m.Short)
+		}
+		fmt.Printf("  模型 #%06x %-32s 图形 %d 控制 %d %v\n",
+			m.ID, name, len(m.Elements), len(m.Control), kinds)
+	}
+	for _, l := range doc.Levels {
+		fmt.Printf("  层 num=%-3d id=%-3d %q\n", l.Number, l.EntryID, l.Name)
+	}
+	if doc.UorPerMaster != 0 {
+		fmt.Printf("  分辨率 uorPerMaster=%g\n", doc.UorPerMaster)
+	}
+	for _, v := range doc.Views {
+		fmt.Printf("  视图 id=%-3d tile=[%.3g %.3g %.3g %.3g] rot0=%.4g\n",
+			v.EntryID, v.Tile[0], v.Tile[1], v.Tile[2], v.Tile[3], v.Rotation[0])
+	}
+	for _, lm := range doc.ViewLevelMasks {
+		fmt.Printf("  层掩码 view=%d bits=%d mask=%#016x\n", lm.ViewID, lm.BitCount, lm.Mask)
+	}
+	for path, ch := range doc.Chunks {
+		fmt.Printf("  chunk %-44s 容量=%d 元素=%d space=%d heap=%d\n",
+			path, ch.Capacity, len(ch.Elements), len(ch.Space), len(ch.Heap))
 	}
 }
 
