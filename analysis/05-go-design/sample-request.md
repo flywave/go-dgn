@@ -12,14 +12,14 @@ v8 网格（18 真实网格验证）、v8 Solid(18/19) 边界甄别、SharedCell
 （5 个真实 SAT 样本全部进入 go-topo）。以下类别已有完整实现，
 **缺真实样本做最终实证**。
 
-## 样本需求清单（按优先级）
+## 样本需求清单（按优先级；状态截至 D126）
 
-| # | 样本内容 | 验证点 | 现有证据基线 |
+| # | 样本内容 | 验证点 | 状态 |
 |---|---|---|---|
-| 1 | **v8 SharedCell**：含 SharedCellDefinition(34) + SharedCellReference(35) 的 v8 文件（MicroStation 放置→共享单元、或 active cells） | ① 0x2716 依赖链 roots[0]=定义句柄（D112 反汇编链）；② StringLinkage(id=1) 定义名；③ flag bit14 子归属；④ 按放置实例化进 go-topo（defID→byID） | D112 反汇编 + D114 合成往返（TestSceneV8SharedCellRoundTrip / TestDgnToMstV8SharedCellInstance） |
-| 2 | **SmartSolid(SmartSurface)**：含 type-2 cell header + 0x522E BrepLinkage 的实体（MicroStation 建模→SmartSolid、参数化实体） | ① kAcisData(2)：SAT 子集解析→精确 B-rep 重建（D114–D116 已就绪，5 真实 SAT 样本全闭环）；② kParasolidData(1)：载荷判别位与 blob 完整性 | 0x522E 载荷布局 CDGAttribEmbeddedBRep 读写双证（D111）；ACIS 通路 POC 全链实证（D113） |
-| 3 | **带网格(105)/Solid(18/19) 的 BIM 文件**：任意含 v8 网格/实体的工程文件 | 网格 105 面语义（已 18 网格验证，扩样本矩阵）、18/19 边界子元素归属 | D109/D110 |
-| 4 | **真 NURBS spline-surface**（非 rotsur 的 `nubs` 块） | SAT-3 NURBS 面 解析→重建 | rotsur 分支已实证（D116） |
+| 1 | **v8 SharedCell**：含 SharedCellDefinition(34) + SharedCellReference(35) 的 v8 文件（MicroStation 放置→共享单元、或 active cells） | ① 0x2716 依赖链 roots[0]=定义句柄（D112 反汇编链）；② StringLinkage(id=1) 定义名；③ flag bit14 子归属；④ 按放置实例化进 go-topo（defID→byID） | ✅ 实现已完成（反汇编+文件级合成全链 TestWriteSyntheticSharedCellSmartSolidFile / TestDgnToMstSyntheticSharedCellFile）；⏳ **待真实样本实证** |
+| 2 | **SmartSolid(SmartSurface)**：含 type-2 cell header + 0x522E BrepLinkage 的实体（MicroStation 建模→SmartSolid、参数化实体） | ① kAcisData(2)：SAT 子集解析→精确 B-rep 重建（D114–D116 已就绪，5 真实 SAT 样本全闭环）；② kParasolidData(1)：载荷判别位与 blob 完整性 | ✅ kAcisData 实现已完成（文件级 fixture 内嵌真实 OdWriteEx.sat 全链通过）；⏳ **待真实样本实证**（kParasolidData 几何需许可内核离线细分，见下节） |
+| 3 | **带网格(105)/Solid(18/19) 的 BIM 文件**：任意含 v8 网格/实体的工程文件 | 网格 105 面语义（已 18 网格验证，扩样本矩阵）、18/19 边界子元素归属 | ✅ 实现已完成并经 18 真实网格验证；⏳ 持续扩样本矩阵 |
+| 4 | **真 NURBS spline-surface**（非 rotsur 的 `nubs` 块） | SAT-3 NURBS 面 解析→重建 | ⏳ 实现待样本（D121：合成 fixture 只能自证，错误布局将静默产出错误几何，故不预落码；token 序列已固化备验） |
 
 ## Parasolid 离线细分替代路径（若无法提供 ACIS 类样本）
 
