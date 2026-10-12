@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 )
 
 var (
@@ -36,6 +37,21 @@ type entry struct {
 	size        uint64
 }
 
+// EntryInfo is a read-only view of one directory entry. Path is the full
+// storage path with "/" separators ("Dgn-Md/#000000/$1"); the root storage
+// itself is not listed. Start is the first FAT (or miniFAT) sector, which
+// reflects on-disk allocation order.
+type EntryInfo struct {
+	Path  string
+	Name  string
+	Type  byte   // 1 storage, 2 stream
+	Start uint32 // first sector (miniFAT index when Size < mini cutoff)
+	Size  uint64
+}
+
+// Kind classifies an entry: 0 other, 1 storage, 2 stream.
+func (e EntryInfo) Kind() byte { return e.Type }
+
 type File struct {
 	data       []byte
 	major      uint16
@@ -45,7 +61,7 @@ type File struct {
 	fat        []uint32
 	miniFat    []uint32
 	entries    []entry
-	order      []int
+	paths      map[int]string // entry index -> full path
 }
 
 func Open(data []byte) (*File, error) {
@@ -145,7 +161,7 @@ func Open(data []byte) (*File, error) {
 			f.miniFat[i] = binary.LittleEndian.Uint32(mb[4*i:])
 		}
 	}
-	f.order = f.walk()
+	f.walk()
 	return f, nil
 }
 
@@ -170,12 +186,15 @@ func parseEntry(b []byte, major uint16) (entry, error) {
 	e.left = idx(68)
 	e.right = idx(72)
 	e.child = idx(76)
+	// ObjectStartSector@116 / StreamSize@120 are at the same offsets in
+	// CFB v3 and v4 (v3 keeps only the low 32 size bits significant).
+	// The previous v3 branch read 120/124, which zeroed every size on
+	// real files (ODA DGN v8 writes v3 containers).
+	e.start = binary.LittleEndian.Uint32(b[116:])
 	if major >= 4 {
-		e.start = binary.LittleEndian.Uint32(b[116:])
 		e.size = binary.LittleEndian.Uint64(b[120:])
 	} else {
-		e.start = binary.LittleEndian.Uint32(b[120:])
-		e.size = uint64(binary.LittleEndian.Uint32(b[124:]))
+		e.size = uint64(binary.LittleEndian.Uint32(b[120:]))
 	}
 	return e, nil
 }
@@ -192,7 +211,7 @@ func decodeUTF16(b []byte) string {
 	return string(s)
 }
 
-func (f *File) walk() []int {
+func (f *File) walk() {
 	root := -1
 	for i, e := range f.entries {
 		if e.typ == entryRoot {
@@ -201,11 +220,11 @@ func (f *File) walk() []int {
 		}
 	}
 	if root < 0 {
-		return nil
+		return
 	}
-	var out []int
-	var visit func(idx int32)
-	visit = func(idx int32) {
+	f.paths = make(map[int]string, len(f.entries))
+	var visit func(idx int32, dir string)
+	visit = func(idx int32, dir string) {
 		if idx < 0 || int(idx) >= len(f.entries) {
 			return
 		}
@@ -213,12 +232,22 @@ func (f *File) walk() []int {
 		if e.typ != entryStorage && e.typ != entryStream {
 			return
 		}
-		out = append(out, int(idx))
-		visit(e.left)
-		visit(e.right)
+		if _, seen := f.paths[int(idx)]; seen {
+			return // corrupt tree: pointer cycle
+		}
+		path := e.name
+		if dir != "" {
+			path = dir + "/" + e.name
+		}
+		f.paths[int(idx)] = path
+		// Storages nest; streams are leaves.
+		if e.typ == entryStorage {
+			visit(e.child, path)
+		}
+		visit(e.left, dir)
+		visit(e.right, dir)
 	}
-	visit(f.entries[root].child)
-	return out
+	visit(f.entries[root].child, "")
 }
 
 func (f *File) sector(id uint32) ([]byte, error) {
@@ -295,44 +324,94 @@ func (f *File) miniChain(start uint32, size uint64) ([]byte, error) {
 	return out, nil
 }
 
-func (f *File) Names() []string {
-	out := make([]string, 0, len(f.order))
-	for _, i := range f.order {
-		out = append(out, f.entries[i].name)
+// Entries lists every storage and stream in the container with full paths,
+// ordered by path.
+func (f *File) Entries() []EntryInfo {
+	out := make([]EntryInfo, 0, len(f.paths))
+	for i, path := range f.paths {
+		e := f.entries[i]
+		out = append(out, EntryInfo{
+			Path:  path,
+			Name:  e.name,
+			Type:  e.typ,
+			Start: e.start,
+			Size:  e.size,
+		})
 	}
-	sort.Strings(out)
+	sort.Slice(out, func(i, j int) bool { return out[i].Path < out[j].Path })
 	return out
 }
 
-func (f *File) Size(name string) (uint64, bool) {
-	for _, i := range f.order {
-		if f.entries[i].name == name {
-			return f.entries[i].size, true
+// Streams lists stream entries only (type 2), ordered by path.
+func (f *File) Streams() []EntryInfo {
+	var out []EntryInfo
+	for _, e := range f.Entries() {
+		if e.Type == entryStream {
+			out = append(out, e)
 		}
 	}
-	return 0, false
+	return out
+}
+
+// Names returns the full path of every entry, sorted.
+func (f *File) Names() []string {
+	entries := f.Entries()
+	out := make([]string, 0, len(entries))
+	for _, e := range entries {
+		out = append(out, e.Path)
+	}
+	return out
+}
+
+// lookup resolves an entry by full path; as a fallback it accepts a bare
+// name when exactly one entry carries it.
+func (f *File) lookup(name string) (int, bool) {
+	for i, path := range f.paths {
+		if path == name {
+			return i, true
+		}
+	}
+	hit, n := -1, 0
+	for i, path := range f.paths {
+		if strings.HasSuffix(path, "/"+name) || path == name {
+			hit, n = i, n+1
+		}
+	}
+	if n == 1 {
+		return hit, true
+	}
+	return -1, false
+}
+
+func (f *File) Size(name string) (uint64, bool) {
+	i, ok := f.lookup(name)
+	if !ok {
+		return 0, false
+	}
+	return f.entries[i].size, true
 }
 
 func (f *File) Stream(name string) ([]byte, error) {
-	for _, i := range f.order {
-		e := f.entries[i]
-		if e.name != name || e.typ != entryStream {
-			continue
-		}
-		if e.size == 0 {
-			return []byte{}, nil
-		}
-		if e.size < uint64(f.cutoff) {
-			return f.miniChain(e.start, e.size)
-		}
-		b, err := f.chain(e.start)
-		if err != nil {
-			return nil, err
-		}
-		if uint64(len(b)) < e.size {
-			return nil, fmt.Errorf("%w: stream %q shorter than declared", ErrCorrupt, name)
-		}
-		return b[:e.size], nil
+	i, ok := f.lookup(name)
+	if !ok {
+		return nil, fmt.Errorf("%w: %q", ErrStreamNotFound, name)
 	}
-	return nil, fmt.Errorf("%w: %q", ErrStreamNotFound, name)
+	e := f.entries[i]
+	if e.typ != entryStream {
+		return nil, fmt.Errorf("%w: %q is a storage", ErrStreamNotFound, name)
+	}
+	if e.size == 0 {
+		return []byte{}, nil
+	}
+	if e.size < uint64(f.cutoff) {
+		return f.miniChain(e.start, e.size)
+	}
+	b, err := f.chain(e.start)
+	if err != nil {
+		return nil, err
+	}
+	if uint64(len(b)) < e.size {
+		return nil, fmt.Errorf("%w: stream %q shorter than declared", ErrCorrupt, name)
+	}
+	return b[:e.size], nil
 }

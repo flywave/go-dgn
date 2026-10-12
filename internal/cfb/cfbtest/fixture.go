@@ -18,24 +18,85 @@ const (
 	fatEntPerSec = sectorSize / 4
 )
 
-type planned struct {
-	name  string
-	data  []byte
-	start uint32
-	mini  bool
+// node is one directory entry: a stream ([]byte value) or a storage (map).
+type node struct {
+	name     string
+	typ      byte // 1 storage, 2 stream
+	data     []byte
+	children []*node
+	index    uint32 // directory entry index (root = 0)
+	right    uint32 // next sibling index
+	start    uint32 // first regular-FAT sector or miniFAT index
 }
 
-func Write(streams map[string][]byte) []byte {
-	names := make([]string, 0, len(streams))
-	for n := range streams {
+func (n *node) childIndex() uint32 {
+	if len(n.children) == 0 {
+		return sectFree
+	}
+	return n.children[0].index
+}
+
+func buildTree(spec map[string]interface{}) []*node {
+	names := make([]string, 0, len(spec))
+	for n := range spec {
 		names = append(names, n)
 	}
 	sort.Strings(names)
-
-	items := make([]planned, 0, len(names))
+	out := make([]*node, 0, len(names))
 	for _, n := range names {
-		items = append(items, planned{name: n, data: streams[n], mini: len(streams[n]) < miniCutoff})
+		switch v := spec[n].(type) {
+		case []byte:
+			out = append(out, &node{name: n, typ: 2, data: v})
+		case map[string]interface{}:
+			out = append(out, &node{name: n, typ: 1, children: buildTree(v)})
+		default:
+			panic("cfbtest: value must be []byte or map")
+		}
 	}
+	return out
+}
+
+// chainLinks assigns pre-order directory indices and returns all nodes.
+// Siblings are chained through `right`; a parent points at its first child
+// through `child`.
+// assignIndexes numbers nodes pre-order and flattens the tree. Sibling
+// right-chains are wired afterwards by linkSiblings (indexes must exist
+// first).
+func assignIndexes(nodes []*node, next uint32, out *[]*node) uint32 {
+	for _, n := range nodes {
+		n.index = next
+		next++
+		*out = append(*out, n)
+		next = assignIndexes(n.children, next, out)
+	}
+	return next
+}
+
+func linkSiblings(nodes []*node) {
+	for i, n := range nodes {
+		if i+1 < len(nodes) {
+			n.right = nodes[i+1].index
+		}
+		linkSiblings(n.children)
+	}
+}
+
+// Write builds a CFB v3 container from a flat name→stream map (root only).
+func Write(streams map[string][]byte) []byte {
+	spec := make(map[string]interface{}, len(streams))
+	for k, v := range streams {
+		spec[k] = v
+	}
+	return WriteTree(spec)
+}
+
+// WriteTree builds a CFB v3 container. Values are []byte (stream) or
+// map[string]interface{} (storage, recursive).
+func WriteTree(spec map[string]interface{}) []byte {
+	top := buildTree(spec)
+	var items []*node
+	assignIndexes(top, 1, &items)
+	linkSiblings(top)
 
 	nEntries := 1 + len(items)
 	nDir := uint32((nEntries + entriesPerS - 1) / entriesPerS)
@@ -43,26 +104,24 @@ func Write(streams map[string][]byte) []byte {
 	next := uint32(1) + nDir
 
 	var miniBytes []byte
-	miniStarts := map[string]uint32{}
-	for i := range items {
-		if !items[i].mini {
+	for _, n := range items {
+		if n.typ != 2 || len(n.data) >= miniCutoff {
 			continue
 		}
-		miniStarts[items[i].name] = uint32(len(miniBytes)) / uint32(miniSize)
-		miniBytes = append(miniBytes, items[i].data...)
-		if pad := (miniSize - len(items[i].data)%miniSize) % miniSize; pad > 0 {
+		n.start = uint32(len(miniBytes)) / uint32(miniSize)
+		miniBytes = append(miniBytes, n.data...)
+		if pad := (miniSize - len(n.data)%miniSize) % miniSize; pad > 0 {
 			miniBytes = append(miniBytes, make([]byte, pad)...)
 		}
 	}
 	miniSectCount := (len(miniBytes) + miniSize - 1) / miniSize
 
-	for i := range items {
-		if items[i].mini {
-			items[i].start = miniStarts[items[i].name]
+	for _, n := range items {
+		if n.typ != 2 || len(n.data) < miniCutoff {
 			continue
 		}
-		items[i].start = next
-		next += uint32((len(items[i].data) + sectorSize - 1) / sectorSize)
+		n.start = next
+		next += uint32((len(n.data) + sectorSize - 1) / sectorSize)
 	}
 
 	nMiniFatSect := uint32(0)
@@ -93,15 +152,15 @@ func Write(streams map[string][]byte) []byte {
 			fat[dirStart+s] = dirStart + s + 1
 		}
 	}
-	for i := range items {
-		if items[i].mini {
+	for _, n := range items {
+		if n.typ != 2 || len(n.data) < miniCutoff {
 			continue
 		}
-		n := uint32((len(items[i].data) + sectorSize - 1) / sectorSize)
-		for s := uint32(0); s < n; s++ {
-			fat[items[i].start+s] = sectEnd
-			if s+1 < n {
-				fat[items[i].start+s] = items[i].start + s + 1
+		nSec := uint32((len(n.data) + sectorSize - 1) / sectorSize)
+		for s := uint32(0); s < nSec; s++ {
+			fat[n.start+s] = sectEnd
+			if s+1 < nSec {
+				fat[n.start+s] = n.start + s + 1
 			}
 		}
 	}
@@ -125,15 +184,15 @@ func Write(streams map[string][]byte) []byte {
 	for i := range miniFat {
 		miniFat[i] = sectFree
 	}
-	for i := range items {
-		if !items[i].mini {
+	for _, n := range items {
+		if n.typ != 2 || len(n.data) >= miniCutoff {
 			continue
 		}
-		n := (len(items[i].data) + miniSize - 1) / miniSize
-		for s := 0; s < n; s++ {
-			id := int(items[i].start) + s
+		nMini := (len(n.data) + miniSize - 1) / miniSize
+		for s := 0; s < nMini; s++ {
+			id := int(n.start) + s
 			miniFat[id] = sectEnd
-			if s+1 < n {
+			if s+1 < nMini {
 				miniFat[id] = uint32(id + 1)
 			}
 		}
@@ -142,16 +201,15 @@ func Write(streams map[string][]byte) []byte {
 	dir := make([]byte, nDir*sectorSize)
 	rootChild := uint32(sectFree)
 	if len(items) > 0 {
-		rootChild = 1
+		rootChild = top[0].index
 	}
 	writeDirEntry(dir[0:], "Root Entry", 5, sectFree, sectFree, rootChild, miniContStart, uint64(len(miniBytes)))
-	for i := range items {
-		off := (1 + i) * 128
-		right := uint32(sectFree)
-		if i+1 < len(items) {
-			right = uint32(1 + i + 1)
+	for _, n := range items {
+		start, size := uint32(sectFree), uint64(0)
+		if n.typ == 2 {
+			start, size = n.start, uint64(len(n.data))
 		}
-		writeDirEntry(dir[off:], items[i].name, 2, sectFree, right, sectFree, items[i].start, uint64(len(items[i].data)))
+		writeDirEntry(dir[int(n.index)*128:], n.name, n.typ, sectFree, n.right, n.childIndex(), start, size)
 	}
 
 	header := make([]byte, sectorSize)
@@ -180,12 +238,12 @@ func Write(streams map[string][]byte) []byte {
 	}
 	out = append(out, fatSec...)
 	out = append(out, dir...)
-	for i := range items {
-		if items[i].mini {
+	for _, n := range items {
+		if n.typ != 2 || len(n.data) < miniCutoff {
 			continue
 		}
-		out = append(out, items[i].data...)
-		if pad := (sectorSize - len(items[i].data)%sectorSize) % sectorSize; pad > 0 {
+		out = append(out, n.data...)
+		if pad := (sectorSize - len(n.data)%sectorSize) % sectorSize; pad > 0 {
 			out = append(out, make([]byte, pad)...)
 		}
 	}
@@ -217,6 +275,7 @@ func writeDirEntry(b []byte, name string, typ byte, left, right, child, start ui
 	binary.LittleEndian.PutUint32(b[68:], left)
 	binary.LittleEndian.PutUint32(b[72:], right)
 	binary.LittleEndian.PutUint32(b[76:], child)
-	binary.LittleEndian.PutUint32(b[120:], start)
-	binary.LittleEndian.PutUint32(b[124:], uint32(size))
+	// CFB v3/v4 both keep ObjectStartSector@116 and StreamSize@120.
+	binary.LittleEndian.PutUint32(b[116:], start)
+	binary.LittleEndian.PutUint64(b[120:], size)
 }

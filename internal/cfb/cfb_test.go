@@ -87,3 +87,65 @@ func TestEmptyStream(t *testing.T) {
 		t.Fatalf("got %v, %v", b, err)
 	}
 }
+
+func TestNestedStorages(t *testing.T) {
+	model := map[string]interface{}{
+		"$1":     []byte("graphics chunk"),
+		"Dgn~Mh": []byte("model header table"),
+	}
+	data := cfbtest.WriteTree(map[string]interface{}{
+		"Dgn~H": []byte("design header"),
+		"Dgn-Md": map[string]interface{}{
+			"#000000": model,
+		},
+	})
+	f, err := Open(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	paths := map[string]bool{}
+	for _, e := range f.Entries() {
+		paths[e.Path] = true
+		if e.Type == 1 && e.Size != 0 {
+			t.Fatalf("storage %s has size %d", e.Path, e.Size)
+		}
+	}
+	for _, want := range []string{
+		"Dgn~H",
+		"Dgn-Md",
+		"Dgn-Md/#000000",
+		"Dgn-Md/#000000/$1",
+		"Dgn-Md/#000000/Dgn~Mh",
+	} {
+		if !paths[want] {
+			t.Fatalf("path %q missing; have %v", want, paths)
+		}
+	}
+	if b, err := f.Stream("Dgn-Md/#000000/$1"); err != nil || string(b) != "graphics chunk" {
+		t.Fatalf("nested stream = %q, %v", b, err)
+	}
+	if b, err := f.Stream("Dgn-Md/#000000/Dgn~Mh"); err != nil || string(b) != "model header table" {
+		t.Fatalf("nested stream = %q, %v", b, err)
+	}
+	if _, err := f.Stream("Dgn-Md"); err == nil {
+		t.Fatal("storage resolved as stream")
+	}
+	// Allocation order: mini-stream contents allocate after regular sectors.
+	streams := f.Streams()
+	if len(streams) != 3 {
+		t.Fatalf("streams = %d", len(streams))
+	}
+}
+
+func TestV3DirectoryEntryOffsets(t *testing.T) {
+	// Regression: v3 entries carry start@116/size@120 (MS-CFB §2.6.1); the
+	// old reader used 120/124 and zeroed every size on real ODA files.
+	data := cfbtest.Write(map[string][]byte{"S": bytes.Repeat([]byte{7}, 100)})
+	f, err := Open(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sz, ok := f.Size("S"); !ok || sz != 100 {
+		t.Fatalf("size = %d, %v", sz, ok)
+	}
+}
