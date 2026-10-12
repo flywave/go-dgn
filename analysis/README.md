@@ -8,7 +8,7 @@
 
 | 项 | 决定 |
 |---|---|
-| 优先级 | **DGN 深挖优先** → DWG → RVT |
+| 优先级 | **DGN 深挖优先** → DWG（RVT 已迁出至同级 `go-rvt` 独立仓库） |
 | 验证方式 | 先纯静态分析（暂无样例文件），样例后续补充 |
 | 输出位置 | `/Users/xuning/Work/go-dgn/analysis/` |
 | 分析对象 | `../ODA-Parse-DWGs-main/`（ODA Teigha 25.4 Windows x64 运行时 + 示例源码 + 全套头文件） |
@@ -19,7 +19,7 @@
 - `01-oda-inventory/` — ODA 模块/头文件/示例程序盘点（分析的入口地图）
 - `02-dwg/` — DWG 格式分析（第二阶段）
 - `03-dgn/` — DGN 格式分析（**当前主线**）
-- `04-rvt/` — RVT 格式分析（此 ODA 包内无 Revit 能力，单独路线图）
+- `04-rvt/` — 指引页（**RVT 已迁至同级 `go-rvt/` 独立仓库**，本项目不再混入）
 - `05-go-design/` — Go 库架构设计（由格式分析结论驱动）
 - `evidence/` — REA 导出的 Evidence bundle（`*.json`，含 ev_ 哈希 ID）
 

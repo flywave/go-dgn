@@ -96,5 +96,9 @@ type Entity struct {
 	Knots   []float64
 	Weights []float64
 	Degree  int
-	BBox    [2]Point // raw-UOR header bbox (v7 only); zero when absent
+	// DefnOnly marks geometry inside a shared-cell DEFINITION (v7 type 34)
+	// span: definition-local coordinates that render only through CellRef
+	// instances, never top-level (BIM shared-cell semantics, D93).
+	DefnOnly bool
+	BBox     [2]Point // raw-UOR header bbox (v7 only); zero when absent
 }

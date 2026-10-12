@@ -703,3 +703,30 @@
 - 遗留：v8 B 样条/实体（KindSolid）映射待 v8 样例；18/19（3D surface/solid 复头）
   与 24（B 样条曲面）解码头已有、scene 映射待样例；bezier 族修复无使用方金样回归
   （仅 geometry_test/topo_test 覆盖）
+
+## 二期 · 第 65 轮（D93：v7 cell 分组 + BIM 放置/实例化 —— 3D BIM 准确转换 ★最新）
+
+- **动因**：BIM 导入要求 3D 准确转换。复核发现 sample.dgn 是**真层级 BIM**——
+  几乎全部几何嵌在 cell 里，而 cell 从未分组 → 全部几何平铺输出、shared cell
+  实例缺失、放置变换未应用（结构级失真）
+- **D93 分组**：type2（legacy cell header）/34（shared defn）按 **span** 分组：
+  Σ(size/2) = TotLength+19（§9 同公式，每元素 +2 字头；GDAL 不分组 cell），
+  sample 223/223 + 115/115 **全对齐**，直接子计数递归下降（嵌套 cell 各计一次）；
+  失配降级 childless 不致命。`GroupV7Elements` + `v7CellSpanChildren/v7GroupExtent`
+- **D93 放置 RE**：39 个 CellRef bbox 与其 defn 内部 bbox **全等 → 样例内全部
+  恒等放置**；ref 体（176B）未见 origin/rotation 字段，三个 4.0 槽（@72/104/136
+  halfword-swapped f32）语义 [?]——非恒等放置待带样例接入 Entity.Transform
+- **godgn `dgn/scene`**：Entity 新增 `DefnOnly`（shared defn 内部=定义空间，
+  只经 ref 实例化渲染）；walk 传播定义空间标记。金样：实体 9138 不变、
+  **nested 56→9002**、**defnOnly=6178**（其中几何 6169）
+- **go-topo 桥**：DgnToMst 实现 §6.5 消费方职责——① cell header 变换沿祖先链
+  **递归下乘**（memoized 4×4 列主序）② CellRef 按名解析 defn 并**实例化**其
+  DefnOnly 几何子树（ref 链 ∘ ref 放置 ∘ defn 链）；合成测试：legacy cell
+  平移放置、shared cell 单实例+无 ref 不渲染
+- **金样更新**：sample DgnToMst **8639 nodes**（8742−6169 defn 几何+6066 实例）/
+  201390 verts / 192751 edges；go-topo hierarchy children=9002
+  （CellDef 8946 + ComplexHeader 56）；DgnReader wires=8742 不变（拓扑出口仍
+  cell-local+Transform 元数据，设计 §6.5）
+- 设计文档同步：§6.2 CellRef 行、§6.5、风险表（CellRef 解析 ✅）
+- 全绿：go-dgn `go test ./...`；go-topo DGN 22 测试 + geometry 回归
+- 遗留：非恒等 CellRef 放置字段 [?]；18/19/24 曲面体、v8 映射仍待样例

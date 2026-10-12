@@ -254,7 +254,7 @@ func DgnToMst(path string) ([]*mst.Mesh, error)
 | KindSolid | 若源含三角网则直接转 MeshNode（顶点/面已在解码器） | 同左 |
 | KindText | Shape=nil，仅元数据（Id/Level/Name=文本） | 跳过 |
 | KindCellDef | 子实体展开（ParentId 链接），头仅元数据 | 子实体各自转换 |
-| KindCellRef | Shape=nil，Name=引用名（按名解析到 CellDef 再展开=二期） | 跳过（二期） |
+| KindCellRef | Shape=nil，Name=引用名；DgnToMst 按名解析到 CellDef 实例化（D93） | 实例化 defn 几何（恒等放置，见 §6.5） |
 | KindComplexHeader | 子实体 ParentId 链接 | 子实体各自转换 |
 
 ### 6.3 坐标管线
@@ -281,7 +281,13 @@ v8 Arc 的 quat 旋转先作用于 XY 平面基，再细分。
 
 - `ParentId` 语义与 IFC 相同：复杂组头 / CellDef 头为父，几何子为子。
 - `Transform` 只挂在 CellDef/CellRef 上；消费方（如 mst 转换）递归下乘。
-  桥不预乘（与 IfcElement.Transform 行为一致）。
+  桥不预乘（与 IfcElement.Transform 行为一致）；**DgnToMst 已实现下乘**。
+- **D93 cell 分组**：v7 type2（legacy cell header）/34（shared defn）按
+  **span** 分组（Σ(size/2) = TotLength+19，与 12/14 同公式；GDAL 不分组 cell，
+  sample 223/223 + 115/115 全对齐）。type34 内部为**定义空间**（`DefnOnly`），
+  只经 CellRef 实例化渲染，不顶层出图；39 个 ref bbox 与其 defn 内部 bbox
+  全等 → **样例内全部恒等放置**；ref 体未见 origin/rotation 字段（三个 4.0
+  槽语义 [?]），非恒等放置待带样例定案后接入 Entity.Transform。
 
 ### 6.6 风格
 
@@ -307,7 +313,7 @@ v8 Arc 的 quat 旋转先作用于 XY 平面基，再细分。
 | 风险 | 缓解 |
 |------|------|
 | v8 master 单位未解析 → 坐标量纲歧义 | 桥侧 SetUnits 显式注入；不做隐式猜测 |
-| Cell 引用（SharedCellRef）名字解析需要定义-引用链接 | M5 二期；一期跳过 Ref 只出元数据 |
+| Cell 引用（SharedCellRef）名字解析需要定义-引用链接 | ✅ D93 已实现（DgnToMst 按名实例化）；非恒等 ref 放置字段 [?] 待样例 |
 | v8 色表未解析 | 桥默认白；二期接表元素 |
 | Text/Spline 语义 | 一期只出元数据；KindText 预留 |
 | scene IR 设计不足导致二次返工 | IR 只含已在解码器验证过的字段（Arc/点列/Cell 变换），不做投机字段 |

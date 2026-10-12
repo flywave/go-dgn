@@ -12,8 +12,8 @@ import (
 func SceneV7(doc V7Document) []scene.Entity {
 	var out []scene.Entity
 	bsConsumed, bsCurves := assembleV7BSplines(doc.Elements, doc.Header.Is3D)
-	var walk func(nodes []V7Node, parent uint64)
-	walk = func(nodes []V7Node, parent uint64) {
+	var walk func(nodes []V7Node, parent uint64, defn bool)
+	walk = func(nodes []V7Node, parent uint64, defn bool) {
 		for _, n := range nodes {
 			el := n.Element
 			if el.Deleted {
@@ -27,6 +27,7 @@ func SceneV7(doc V7Document) []scene.Entity {
 				Dim:      dimOf(doc.Header.Is3D),
 				Level:    int(el.Level),
 				Color:    int32(c.Color),
+				DefnOnly: defn,
 				BBox:     bboxFromCore(c),
 			}
 			switch el.Type {
@@ -125,10 +126,10 @@ func SceneV7(doc V7Document) []scene.Entity {
 				continue
 			}
 			out = append(out, e)
-			walk(n.Children, id)
+			walk(n.Children, id, defn || el.Type == 34)
 		}
 	}
-	walk(doc.Top, 0)
+	walk(doc.Top, 0, false)
 	return out
 }
 

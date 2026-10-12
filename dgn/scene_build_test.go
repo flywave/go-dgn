@@ -40,13 +40,19 @@ func TestSceneV7SampleGolden(t *testing.T) {
 		}
 	}
 
-	// Parent integrity: every ParentID must reference a ComplexHeader entity.
+	// Parent integrity: every ParentID must reference a ComplexHeader
+	// (chain/shape group) or CellDef (cell header / shared-defn span group,
+	// D93). DefnOnly marks shared-definition interiors (render only via
+	// CellRef instances).
 	byID := map[uint64]scene.Entity{}
 	for _, e := range ents {
 		byID[e.ID] = e
 	}
-	nested := 0
+	nested, defnOnly := 0, 0
 	for _, e := range ents {
+		if e.DefnOnly {
+			defnOnly++
+		}
 		if e.ParentID == 0 {
 			continue
 		}
@@ -54,15 +60,18 @@ func TestSceneV7SampleGolden(t *testing.T) {
 		if !ok {
 			t.Fatalf("entity %d parent %d missing", e.ID, e.ParentID)
 		}
-		if p.Kind != scene.KindComplexHeader {
+		if p.Kind != scene.KindComplexHeader && p.Kind != scene.KindCellDef {
 			t.Fatalf("entity %d parent kind %s", e.ID, p.Kind)
 		}
 		nested++
 	}
-	if nested == 0 {
-		t.Fatal("expected nested children under complex headers")
+	if nested != 9002 {
+		t.Errorf("nested=%d want 9002 (56 complex-group + cell spans, D93)", nested)
 	}
-	t.Logf("entities=%d nested=%d", len(ents), nested)
+	if defnOnly != 6178 {
+		t.Errorf("defnOnly=%d want 6178 (shared-defn interiors, D93)", defnOnly)
+	}
+	t.Logf("entities=%d nested=%d defnOnly=%d", len(ents), nested, defnOnly)
 }
 
 // TestSceneV7BSplineAssemblies pins the v7 B-spline curve assembly: each
