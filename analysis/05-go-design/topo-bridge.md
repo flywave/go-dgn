@@ -250,8 +250,8 @@ func DgnToMst(path string) ([]*mst.Mesh, error)
 | KindArc | `TopoMakeThreePointArc`（起/中/末三点由 center+r+角算出） | 弧细分（弦高误差 ε，见6.4） |
 | KindEllipse | 采样成 N 段三点弧 Edge 链 | 椭圆细分 |
 | KindPointString | 仅顶点集（Vertex 数组），无 Edge | 点精灵/跳过 |
-| KindCone | 三角化成 MeshNode（上下面+侧面）；Shape 暂为 nil | 同左 |
-| KindSolid | 若源含三角网则直接转 MeshNode（顶点/面已在解码器） | 同左 |
+| KindCone | `TopoMakeShellFromConeAxis2`+`TopoMakeSolidFromShell` 真圆台实体（R1==R2 走圆柱原语，D110）；挂在 DgnElement.Shape | 三角化成 MeshNode（上下面+侧面） |
+| KindSolid | 面环→`TopoMakeFaceFromPoints` 面集→`TopoCompoundMake` 复合体，挂 DgnElement.Shape（面语义按 DgMesh.h 六样式推导，D110） | 面环扇形三角化 → MeshTriangle 节点 |
 | KindText | Shape=nil，仅元数据（Id/Level/Name=文本） | 跳过 |
 | KindCellDef | 子实体展开（ParentId 链接），头仅元数据 | 子实体各自转换 |
 | KindCellRef | Shape=nil，Name=引用名；DgnToMst 按名解析到 CellDef 实例化（D93） | 实例化 defn 几何（恒等放置，见 §6.5） |

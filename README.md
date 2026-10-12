@@ -46,3 +46,21 @@ must sit next to `go.mod`.
 - v7: source-level parity with GDAL dgnlib; golden-sample validated
 - v8: 47 registry keys + wildcards, write/read cross-validated against
   ODA dgnOutFields; real-file golden testing pending a v8 sample
+
+## Sample request（真实样本征集）
+
+为验证并加固以下 DGN 能力，欢迎业务侧（bim4d / minebim / digital-twins /
+tunneling 等）提供真实 DGN 样本（放入 `dgn/testdata/` 并注明来源脱敏级别）：
+
+1. **v8 共享单元**：含 SharedCellDefinition(34) / SharedCellReference(35)
+   的 v8 文件——用于实证 0x2716 依赖链（定义句柄）、StringLinkage(id=1)
+   定义名、flag bit14 子归属（D112 反汇编链的样例验证）。
+2. **SmartSolid 实体**：含 MicroStation SmartSolid/Surface（type-2 cell
+   header + 0x522E BrepLinkage）的文件——ACIS(2) 载荷可直接经 `dgn/sat`
+   重建为精确 B-rep（D114–D116，归档 5 个 SAT 样本已全闭环）；Parasolid(1)
+   载荷用于确认判别位。
+3. **带网格(105)与 Solid(18/19) 的 BIM 文件**：扩充 D111 的真实样本矩阵。
+
+完整需求清单/验证点/Parasolid 离线细分替代路径见
+`analysis/05-go-design/sample-request.md`（D119 工单）。样本只读解析，
+不外发。联系 go-dgn 维护者即可。

@@ -12,6 +12,12 @@ func u32le(v uint32) []byte {
 	return b
 }
 
+func u64le(v uint64) []byte {
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, v)
+	return b
+}
+
 func f64le(v float64) []byte {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, math.Float64bits(v))
@@ -264,14 +270,29 @@ func TestDecodeBitMask(t *testing.T) {
 }
 
 func TestDecodeDependency(t *testing.T) {
-	// variant=(word3>>10)&0xf; word3=0x0400 → variant 1
+	// rootDataType=(word3>>10)&0xf; word3=0x0400 → 1 (kElementId_V,
+	// roots stay raw)
 	raw := join(u32le(5), []byte{1, 0}, []byte{2, 0}, []byte{0x00, 0x04}, []byte{0xAA})
 	p, err := DecodePayload(Rec{TypeID: 0x56d0, Raw: raw})
 	if err != nil {
 		t.Fatal(err)
 	}
 	d := p.(*Dependency)
-	if d.Header != 5 || d.W1 != 1 || d.W2 != 2 || d.Variant != 1 || len(d.Rest) != 1 {
+	if d.Header != 5 || d.AppID != 1 || d.AppValue != 2 || d.RootDataType != 1 || len(d.Rest) != 1 {
+		t.Fatalf("%+v", d)
+	}
+
+	// kElementId roots (D112): the shared-cell definition reference —
+	// AppID 0x2716, one u64 element handle
+	raw = join(u32le(9), []byte{0x16, 0x27}, []byte{0, 0}, []byte{0, 0},
+		[]byte{1, 0}, u64le(0x64))
+	p, err = DecodePayload(Rec{TypeID: 0x56d0, Raw: raw})
+	if err != nil {
+		t.Fatal(err)
+	}
+	d = p.(*Dependency)
+	if d.AppID != 0x2716 || d.RootDataType != 0 || d.RootCount != 1 ||
+		len(d.Roots) != 1 || d.Roots[0] != 0x64 {
 		t.Fatalf("%+v", d)
 	}
 }
@@ -442,7 +463,7 @@ func TestDecodersCoverHandlerTable(t *testing.T) {
 	rawPending := map[uint16]bool{
 		0x0000: true,  // DMRS: seek-rewind stream, kept raw
 		0x0041: false, // has decoder (family)
-		0x522e: true,  // Brep: embedded CDGAttrib, handler-owned
+		0x522e: false, // has decoder (Brep, D111)
 		0x56d8: false,
 		0x56de: true, // Dimension: 750-line specialized handler
 		0x7d28: true, // Hatch: geometry-heavy handler
@@ -452,5 +473,34 @@ func TestDecodersCoverHandlerTable(t *testing.T) {
 		if !hasDec && !rawPending[id] {
 			t.Errorf("handler 0x%x has neither decoder nor raw-pending entry", id)
 		}
+	}
+}
+
+// TestDecodeBrep pins the 0x522E OdDgBrepLinkage payload (D111,
+// CDGAttribEmbeddedBRep read/write double-proven): headerValue, two flag
+// words, scale, native kernel BRep bytes.
+func TestDecodeBrep(t *testing.T) {
+	w16 := func(v uint16) []byte {
+		b := make([]byte, 2)
+		binary.LittleEndian.PutUint16(b, v)
+		return b
+	}
+	// handler buffer: [u16 bits][u16 id][f1][f2][scale][data]
+	raw := join(w16(0x1000|7), w16(0x522e), w16(7), w16(9),
+		f64le(0.5), []byte{0xAA, 0xBB, 0xCC, 0xDD, 0xEE})
+	p, err := DecodePayload(Rec{TypeID: 0x522e, Raw: raw})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := p.(*Brep)
+	if b.Header != 0x522e_1007 || b.Flag1 != 7 || b.Flag2 != 9 || b.Scale != 0.5 {
+		t.Fatalf("%+v", b)
+	}
+	if len(b.Data) != 5 || b.Data[0] != 0xAA {
+		t.Fatalf("data = %v", b.Data)
+	}
+
+	if _, err := DecodePayload(Rec{TypeID: 0x522e, Raw: raw[:12]}); err == nil {
+		t.Fatal("short payload accepted")
 	}
 }

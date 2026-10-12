@@ -76,6 +76,16 @@ type Arc struct {
 	Quat          [4]float64
 }
 
+// BRep carries the 0x522E OdDgBrepLinkage payload of a SmartSolid/
+// SmartSurface (D111, CDGAttribEmbeddedBRep read/write double-proven):
+// two flag words, the BRep scale, and the native kernel binary.
+type BRep struct {
+	Flag1 uint16
+	Flag2 uint16
+	Scale float64
+	Data  []byte
+}
+
 // Entity is one geometry-bearing element in a scene.
 type Entity struct {
 	ID        uint64 // v7: element frame offset; v8: Header.ID
@@ -87,6 +97,7 @@ type Entity struct {
 	Name      string       // cell / shared-cell name
 	Transform *[16]float64 // cell placement, column-major 4x4; nil otherwise
 	Points    []Point      // KindSegment/Polyline/PointString endpoints; KindCone centers; KindText origin; KindBSplineCurve poles
+	Faces     [][]int32    // KindSolid (v8 mesh 105): vertex-index face loops into Points; nil = points only (cloud / undecodable faces)
 	Radii     [2]float64   // KindCone: radius1, radius2
 	Arc       *Arc         // KindArc/KindEllipse
 	Text      string       // KindText
@@ -101,4 +112,13 @@ type Entity struct {
 	// instances, never top-level (BIM shared-cell semantics, D93).
 	DefnOnly bool
 	BBox     [2]Point // raw-UOR header bbox (v7 only); zero when absent
+	// BRep marks a SmartSolid/SmartSurface/FeatureSolid: a v8 type-2 cell
+	// header carrying a 0x522E OdDgBrepLinkage (D111). Data is the native
+	// parasolid/ACIS binary — no Go/OCCT kernel tessellates it, so the
+	// entity is metadata-only geometry.
+	BRep *BRep
+	// DefID is the definition element a v8 KindCellRef instances (D112):
+	// the 0x2716 dependency linkage's element-id root. 0 = unknown (the
+	// name-based v7 path resolves definitions instead).
+	DefID uint64
 }

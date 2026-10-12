@@ -33,7 +33,12 @@ type Header struct {
 	Tail uint64
 }
 
-func (h Header) IsComplex() bool        { return h.Flag&FlagComplex != 0 }
+func (h Header) IsComplex() bool { return h.Flag&FlagComplex != 0 }
+
+// IsComplexChild reports the flag bit14 — the complex-chain MEMBER marker
+// (real-file census D112: container heads carry bit13, their children
+// bit14; the historical "Extra4" getter name is a misnomer).
+func (h Header) IsComplexChild() bool   { return h.Flag&FlagExtra4 != 0 }
 func (h Header) HasDisplayHeader() bool { return h.Flag&FlagDisplayHeader != 0 }
 func (h Header) HasExtra4() bool        { return h.Flag&FlagExtra4 != 0 }
 func (h Header) IsLocked() bool         { return h.Flag&(1<<11) != 0 }

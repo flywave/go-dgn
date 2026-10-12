@@ -2,6 +2,7 @@ package dgn
 
 import (
 	"github.com/flywave/go-dgn/dgn/element"
+	"github.com/flywave/go-dgn/dgn/linkage"
 	"github.com/flywave/go-dgn/dgn/scene"
 )
 
@@ -47,6 +48,15 @@ func SceneV7(doc V7Document) []scene.Entity {
 					continue
 				}
 				e.Kind = scene.KindPolyline
+				for _, p := range pts {
+					e.Points = append(e.Points, v7pt(p))
+				}
+			case 22:
+				pts, err := ReadV7MultiPoint(el, doc.Header.Is3D)
+				if err != nil {
+					continue
+				}
+				e.Kind = scene.KindPointString
 				for _, p := range pts {
 					e.Points = append(e.Points, v7pt(p))
 				}
@@ -173,7 +183,22 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 		return nil, err
 	}
 	bsConsumed, bsCurves := assembleV8BSplines(parsed)
-	meshConsumed, meshPoints := assembleV8MeshPoints(parsed)
+	meshConsumed, meshAt := assembleV8MeshAt(parsed)
+	// v8 complex-child association (D112): flag bit14 marks a complex-chain
+	// member (real-file census — heads carry bit13, children bit14); a
+	// type-34 shared-cell definition owns the adjacent bit14 run, mirroring
+	// the CDGComplexGeneral adjacency used by mesh/solid containers.
+	defnChildren := map[int]uint64{}
+	defnOnly := map[int]bool{}
+	for i, p := range parsed {
+		if p.Record.Type != 34 {
+			continue
+		}
+		for j := i + 1; j < len(parsed) && parsed[j].Entry.Header.IsComplexChild(); j++ {
+			defnChildren[j] = p.Record.ID
+			defnOnly[j] = true
+		}
+	}
 	var out []scene.Entity
 	for i, p := range parsed {
 		if bsConsumed[i] || meshConsumed[i] {
@@ -184,10 +209,12 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 			continue
 		}
 		e := scene.Entity{
-			ID:    p.Record.ID,
-			Dim:   dimOf(p.Record.Ext != 0),
-			Level: int(p.Record.Subtype),
-			Color: -1,
+			ID:       p.Record.ID,
+			ParentID: defnChildren[i],
+			Dim:      dimOf(p.Record.Ext != 0),
+			Level:    int(p.Record.Subtype),
+			Color:    -1,
+			DefnOnly: defnOnly[i],
 		}
 		if a, ok := bsCurves[i]; ok {
 			e.Kind = scene.KindBSplineCurve
@@ -200,9 +227,12 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 			out = append(out, e)
 			continue
 		}
-		if pts, ok := meshPoints[i]; ok {
+		if m, ok := meshAt[i]; ok {
 			e.Kind = scene.KindSolid
-			e.Points = pts
+			for _, v := range m.Points {
+				e.Points = append(e.Points, scene.Point{X: v[0], Y: v[1], Z: v[2]})
+			}
+			e.Faces = m.Faces()
 			out = append(out, e)
 			continue
 		}
@@ -273,7 +303,11 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 			e.Points = []scene.Point{pt3(v.P1), pt3(v.P2)}
 			e.Radii = [2]float64{v.R1, v.R2}
 		case *element.Solid:
-			e.Kind = scene.KindSolid
+			// v8 Surface(18)/Solid(19) are boundary-curve objects
+			// (Dg3DObject.h, D110): the geometry lives in their child
+			// curves, so they surface as group headers — matching the v7
+			// treatment of 18/19. Polygon-mesh solids are type 105.
+			e.Kind = scene.KindComplexHeader
 		case *element.Text:
 			e.Kind = scene.KindText
 			e.Text = string(v.Value)
@@ -292,8 +326,32 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 			e.Kind = scene.KindCellDef
 			e.Transform = cell2dTransform(v.M, v.P3)
 		case *element.CellHeader3d:
+			if br := brepLinkage(p.Linkages); br != nil {
+				// SmartSolid/SmartSurface: cell header + kernel BRep
+				// linkage (D111) — no polygon geometry in the file.
+				e.Kind = scene.KindSolid
+				e.BRep = br
+			} else {
+				e.Kind = scene.KindCellDef
+				e.Transform = cell3dTransform(v.M, v.P3)
+			}
+		case *element.SharedCellInst:
+			// v8 shared-cell reference: placement = Mat(3×3) with the
+			// trailing Pt3d as translation (GetTransformation reads the
+			// 4×4 whose translation block dgnInFields fills from the
+			// last point, D111); Origin1/Origin2 are the range box.
+			e.Kind = scene.KindCellRef
+			e.Transform = cell3dTransform(v.Mat, v.Origin3)
+			if d := sharedCellDefID(p.Linkages); d != 0 {
+				// 0x2716 dependency (D112): roots[0] = definition handle
+				e.DefID = d
+			}
+		case *element.SharedCellDef:
 			e.Kind = scene.KindCellDef
-			e.Transform = cell3dTransform(v.M, v.P3)
+			if name := stringLinkageValue(p.Linkages, 1); name != "" {
+				// ESharedCellDef::GetName = getStringLinkage(1) (D112)
+				e.Name = name
+			}
 		case *element.ComplexElement:
 			e.Kind = scene.KindComplexHeader
 		default:
@@ -397,40 +455,6 @@ func assembleV8BSplines(parsed []Parsed) (consumed map[int]bool, curves map[int]
 	return consumed, curves
 }
 
-// assembleV8Meshes groups type-105 mesh heads with their adjacent Matrix
-// children (101 headers, 102/103 data blocks — D108). The DoubleData
-// blocks yield the vertices (three f64 per point); faces stay unpinned.
-// Consumed children are excluded from individual output.
-func assembleV8MeshPoints(parsed []Parsed) (consumed map[int]bool, meshes map[int][]scene.Point) {
-	consumed = map[int]bool{}
-	meshes = map[int][]scene.Point{}
-	isMatrix := func(t uint16) bool { return t == 101 || t == 102 || t == 103 }
-	for i := range parsed {
-		if parsed[i].Record.Type != 105 {
-			continue
-		}
-		var pts []scene.Point
-		found := false
-		for j := i + 1; j < len(parsed) && isMatrix(parsed[j].Record.Type); j++ {
-			b, ok := parsed[j].Body.(*Body)
-			if !ok {
-				continue
-			}
-			if v, ok := b.Value.(*element.MatrixDoubleData); ok {
-				found = true
-				for k := 0; k+2 < len(v.Values); k += 3 {
-					pts = append(pts, scene.Point{X: v.Values[k], Y: v.Values[k+1], Z: v.Values[k+2]})
-				}
-			}
-			consumed[j] = true
-		}
-		if found {
-			meshes[i] = pts
-		}
-	}
-	return consumed, meshes
-}
-
 func toMaster(tcb *V7TCB, p scene.Point) scene.Point {
 	m := tcb.ToMaster([3]float64{p.X, p.Y, p.Z})
 	return scene.Point{X: m[0], Y: m[1], Z: m[2]}
@@ -519,6 +543,67 @@ func cell3dTransform(mat [9]float64, origin element.Point3d) *[16]float64 {
 }
 
 func pt2(p element.Point2d) scene.Point { return scene.Point{X: p.X, Y: p.Y} }
+
+// sharedCellDefID extracts the definition element handle from a shared
+// cell instance's 0x2716 dependency linkage (D112): the 0x56D0 record
+// with root data type kElementId whose first root is the definition.
+func sharedCellDefID(lgs []linkage.Rec) uint64 {
+	for _, lg := range lgs {
+		if lg.TypeID != 0x56d0 {
+			continue
+		}
+		pl, err := linkage.DecodePayload(lg)
+		if err != nil {
+			continue
+		}
+		if d, ok := pl.(*linkage.Dependency); ok &&
+			d.AppID == 0x2716 && d.RootDataType == 0 && len(d.Roots) > 0 {
+			return d.Roots[0]
+		}
+	}
+	return 0
+}
+
+// stringLinkageValue returns the string of the 0x56D2 StringLinkage with
+// the given sub-id (ESharedCellDef's name is id 1, D112).
+func stringLinkageValue(lgs []linkage.Rec, id uint32) string {
+	for _, lg := range lgs {
+		if lg.TypeID != 0x56d2 {
+			continue
+		}
+		pl, err := linkage.DecodePayload(lg)
+		if err != nil {
+			continue
+		}
+		if str, ok := pl.(*linkage.String); ok && str.ID == id {
+			return string(str.Data)
+		}
+	}
+	return ""
+}
+
+// brepLinkage extracts the 0x522E BRep payload from an element's linkage
+// set (SmartSolid/Surface marker, D111).
+func brepLinkage(lgs []linkage.Rec) *scene.BRep {
+	for _, lg := range lgs {
+		if lg.TypeID != 0x522e {
+			continue
+		}
+		pl, err := linkage.DecodePayload(lg)
+		if err != nil {
+			continue
+		}
+		if b, ok := pl.(*linkage.Brep); ok {
+			return &scene.BRep{
+				Flag1: b.Flag1,
+				Flag2: b.Flag2,
+				Scale: b.Scale,
+				Data:  b.Data,
+			}
+		}
+	}
+	return nil
+}
 func pt3(p element.Point3d) scene.Point { return scene.Point{X: p.X, Y: p.Y, Z: p.Z} }
 
 func map2d(pts []element.Point2d) []scene.Point {

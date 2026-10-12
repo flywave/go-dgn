@@ -118,13 +118,22 @@ func decodeAssocRegion(raw []byte) (any, error) {
 
 // Dependency is kDependency(0x56D0), handler FUN_18003be90 with 7-way
 // subtype dispatch; the selector (FUN_1808af400) reads u32 header + u16×3
-// and returns variant=(word3>>10)&0xf (D89). Variant payload layouts are
-// class-reader owned; Rest keeps them raw.
+// and returns rootDataType=(word3>>10)&0xf (D89, DgAttributeLinkage.h
+// RootDataType: 0=kElementId, 1=kElementId_V, 2/3=assoc points, 4/5=far
+// element ids, 6=path). The kElementId roots are pinned by
+// OdDgDepLinkageElementIdData::readRoots disassembly (D112):
+// [u16 count][count × u64 element handle] — a shared-cell definition
+// reference is the dependency with AppID 0x2716 and roots[0] = the
+// definition's element handle. Non-element-id variants keep Rest raw.
 type Dependency struct {
-	Header  uint32
-	W1, W2  uint16
-	Variant uint8
-	Rest    []byte
+	Header       uint32
+	AppID        uint16 // @4 (was W1)
+	AppValue     uint16 // @6 (was W2)
+	RootDataType uint8  // bits 10..13 of @8 (was Variant)
+	Flags        uint16 // raw word @8
+	RootCount    int    // @10 — element-id roots only
+	Roots        []uint64
+	Rest         []byte // tail beyond the roots (raw variants: from @10)
 }
 
 func decodeDependency(raw []byte) (any, error) {
@@ -135,14 +144,32 @@ func decodeDependency(raw []byte) (any, error) {
 	if len(raw) < 10 {
 		return nil, fmt.Errorf("linkage: dependency too short (%d)", len(raw))
 	}
+	w3 := binary.LittleEndian.Uint16(raw[8:])
 	d := &Dependency{
-		Header:  hdr,
-		W1:      binary.LittleEndian.Uint16(raw[4:]),
-		W2:      binary.LittleEndian.Uint16(raw[6:]),
-		Variant: uint8((binary.LittleEndian.Uint16(raw[8:]) >> 10) & 0xf),
+		Header:       hdr,
+		AppID:        binary.LittleEndian.Uint16(raw[4:]),
+		AppValue:     binary.LittleEndian.Uint16(raw[6:]),
+		RootDataType: uint8((w3 >> 10) & 0xf),
+		Flags:        w3,
 	}
-	if len(raw) > 10 {
-		d.Rest = append([]byte(nil), raw[10:]...)
+	switch {
+	case d.RootDataType == 0 && len(raw) >= 12:
+		n := int(binary.LittleEndian.Uint16(raw[10:]))
+		if 12+n*8 > len(raw) {
+			n = (len(raw) - 12) / 8 // short stream: take what's there
+		}
+		d.RootCount = n
+		for i := 0; i < n; i++ {
+			d.Roots = append(d.Roots, binary.LittleEndian.Uint64(raw[12+i*8:]))
+		}
+		if tail := 12 + n*8; tail < len(raw) {
+			d.Rest = append([]byte(nil), raw[tail:]...)
+		}
+	default:
+		d.RootCount = -1 // not an element-id dependency
+		if len(raw) > 10 {
+			d.Rest = append([]byte(nil), raw[10:]...)
+		}
 	}
 	return d, nil
 }

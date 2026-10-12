@@ -47,6 +47,7 @@ var decoders = map[uint16]func([]byte) (any, error){
 	0x56ea: decodeSharedCellFlags,
 	0x56ee: decodeSheetScale,
 	0x5751: decodeByteArray,
+	0x522e: decodeBrep,
 }
 
 // HandlerIDs lists every primary ID with a typed handler in TG_Db
