@@ -81,6 +81,16 @@ func ReadV7Elements(b []byte) ([]V7Element, error) {
 		words := binary.LittleEndian.Uint16(b[off+2:])
 		size := int(words)*2 + 4
 		if size < 4 || off+size > len(b) {
+			// Trailing garbage: real files can carry non-element bytes
+			// after the element stream (Aspose Nikon_D90_Camera.dgn has
+			// 123 trailing bytes; the last 0xFFFF fill lands mid-body, so
+			// the terminator never matches an element boundary). Once
+			// elements parsed, treat the rest as a trailer instead of
+			// failing the whole document; a file whose FIRST element is
+			// out of range is still rejected as corrupt.
+			if len(out) > 0 {
+				return out, nil
+			}
 			return out, fmt.Errorf("dgn/v7: element at %d size %d out of range (%d total)", off, size, len(b))
 		}
 		out = append(out, V7Element{
