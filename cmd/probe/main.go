@@ -73,6 +73,12 @@ func probeV8(p string) {
 	if doc.UorPerMaster != 0 {
 		fmt.Printf("  分辨率 uorPerMaster=%g\n", doc.UorPerMaster)
 	}
+	for _, m := range doc.Models {
+		for _, mesh := range doc.Meshes(m) {
+			fmt.Printf("  网格 model=%q style=%d id=%d 点=%d 索引=%d\n",
+				m.Name, mesh.Style, mesh.EntryID, len(mesh.Points), len(mesh.Ints))
+		}
+	}
 	for _, v := range doc.Views {
 		fmt.Printf("  视图 id=%-3d tile=[%.3g %.3g %.3g %.3g] rot0=%.4g\n",
 			v.EntryID, v.Tile[0], v.Tile[1], v.Tile[2], v.Tile[3], v.Rotation[0])

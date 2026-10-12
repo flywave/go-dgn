@@ -99,12 +99,16 @@ type V8Document struct {
 	Header         V8Header
 	Index          []V8ModelInfo
 	Models         []*V8Model
-	Tables         []Parsed            // Dgn^Nm/$ elements
-	Levels         []V8Level           // named level rows found in the tables
-	Views          []V8View            // type-98 view definitions (rotation + tile)
-	ViewLevelMasks []V8LevelMask       // type-99 per-view level visibility masks
-	Design         *DesignFileHeader   // type-9 design header (file-level settings)
-	UorPerMaster   float64             // UORs per master unit (type-9 body @48)
+	Tables         []Parsed          // Dgn^Nm/$ elements
+	Levels         []V8Level         // named level rows found in the tables
+	Views          []V8View          // type-98 view definitions (rotation + tile)
+	ViewLevelMasks []V8LevelMask     // type-99 per-view level visibility masks
+	Design         *DesignFileHeader // type-9 design header (file-level settings)
+	UorPerMaster   float64           // UORs per master unit (type-9 body @48)
+
+	// indexes built during V8() — O(1) lookups for consumers
+	chunksByParent map[string][]*V8Chunk
+	levelNameByNum map[uint32]string
 	Chunks         map[string]*V8Chunk // every '$' chunk by container path
 	Aux            map[string][]byte   // decoded zip payloads by container path
 	Raw            map[string][]byte   // raw bytes of non-zip streams by container path
@@ -169,14 +173,24 @@ func (f *File) V8() (*V8Document, error) {
 		}
 	}
 
+	// Index chunks by parent storage once; every per-model walk reuses it.
+	doc.chunksByParent = make(map[string][]*V8Chunk, len(doc.Chunks))
+	for path, chunk := range doc.Chunks {
+		parent := chunkParent(path)
+		doc.chunksByParent[parent] = append(doc.chunksByParent[parent], chunk)
+	}
+
+	// Index chunks by parent storage once; every per-model walk reuses it.
+	doc.chunksByParent = make(map[string][]*V8Chunk, len(doc.Chunks))
+	for path, chunk := range doc.Chunks {
+		doc.chunksByParent[chunkParent(path)] = append(doc.chunksByParent[chunkParent(path)], chunk)
+	}
+
 	// UOR resolution: the uorPerMaster double sits at offset 48 of the
 	// type-9 element body (the v7-compat TCB container; constant 10000 in
 	// all goldens — D104). Master coordinates = UOR / UorPerMaster.
 	doc.UorPerMaster = 10000
-	for path, chunk := range doc.Chunks {
-		if chunkParent(path) != StorageTables {
-			continue
-		}
+	for _, chunk := range doc.chunksByParent[StorageTables] {
 		for i := range chunk.Elements {
 			if chunk.Elements[i].Record.Type != 9 {
 				continue
@@ -247,10 +261,7 @@ func (f *File) V8() (*V8Document, error) {
 	// Per-model settings (unit scales) from the type-66 AppData element.
 	for _, m := range doc.Models {
 		m.Settings.SubUnitsPerUor = 1.0 // OdDgModel UnitDescription default
-		for path, chunk := range doc.Chunks {
-			if chunkParent(path) != m.Storage+"/"+StorageControl {
-				continue
-			}
+		for _, chunk := range doc.chunksByParent[m.Storage+"/"+StorageControl] {
 			for i := range chunk.Elements {
 				p := &chunk.Elements[i]
 				if p.Record.Type != 66 || p.Record.Subtype&0xff != 20 {
@@ -271,13 +282,11 @@ func (f *File) V8() (*V8Document, error) {
 	sort.Slice(doc.Models, func(i, j int) bool { return doc.Models[i].ID < doc.Models[j].ID })
 
 	// File-level tables (Dgn^Nm).
-	for path, chunk := range doc.Chunks {
-		if chunkParent(path) == StorageTables {
-			doc.Tables = append(doc.Tables, chunk.Elements...)
-			for i := range chunk.Elements {
-				if dh, ok := chunk.Elements[i].Body.(*DesignFileHeader); ok && doc.Design == nil {
-					doc.Design = dh
-				}
+	for _, chunk := range doc.chunksByParent[StorageTables] {
+		doc.Tables = append(doc.Tables, chunk.Elements...)
+		for i := range chunk.Elements {
+			if dh, ok := chunk.Elements[i].Body.(*DesignFileHeader); ok && doc.Design == nil {
+				doc.Design = dh
 			}
 		}
 	}
@@ -315,6 +324,13 @@ func (f *File) V8() (*V8Document, error) {
 			})
 		}
 	}
+	// O(1) level lookup (first name wins, matching the linear scan order).
+	doc.levelNameByNum = make(map[uint32]string, len(doc.Levels))
+	for _, l := range doc.Levels {
+		if _, dup := doc.levelNameByNum[l.Number]; !dup {
+			doc.levelNameByNum[l.Number] = l.Name
+		}
+	}
 	return doc, nil
 }
 
@@ -323,12 +339,7 @@ func (f *File) V8() (*V8Document, error) {
 // golden-verified: Sub=64 → "Default"/"0", Sub=2..4 → "XRef Level 1..3");
 // empty when no named row matches.
 func (doc *V8Document) LevelName(levelID uint32) string {
-	for _, l := range doc.Levels {
-		if l.Number == levelID {
-			return l.Name
-		}
-	}
-	return ""
+	return doc.levelNameByNum[levelID]
 }
 
 func (doc *V8Document) warn(err error) {

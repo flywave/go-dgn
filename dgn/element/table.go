@@ -124,6 +124,67 @@ func ReadMeshHeader(r *le.Reader) (*MeshHeader, error) {
 	return m, r.Err()
 }
 
+// MatrixHeader is kTypeMatrixHeader(101) (D108, read/write double-proven
+// `1801f28a0`): [u16][70B blob][u32×5] with the words named via the impl
+// getter chain — sizeOfStruct, sizeOfRow, tag, indexFamily, indexedBy.
+// Matrix records are the geometry carriers of complex containers (mesh
+// type-105 heads own 101 headers + 102/103 data blocks).
+type MatrixHeader struct {
+	W            uint16
+	Blob         [70]byte
+	SizeOfStruct uint32
+	SizeOfRow    uint32
+	Tag          uint32
+	IndexFamily  uint32
+	IndexedBy    uint32
+}
+
+func ReadMatrixHeader(r *le.Reader) (*MatrixHeader, error) {
+	m := &MatrixHeader{W: r.U16()}
+	copy(m.Blob[:], r.Bytes(70))
+	if r.Err() != nil {
+		return nil, r.Err()
+	}
+	m.SizeOfStruct = r.U32()
+	m.SizeOfRow = r.U32()
+	m.Tag = r.U32()
+	m.IndexFamily = r.U32()
+	m.IndexedBy = r.U32()
+	return m, r.Err()
+}
+
+// MatrixIntData is kTypeMatrixIntData(102) (D108 `1802eb6f0`): same shape
+// as MatrixDoubleData with count×i32 values. The i32 stream carries mesh
+// face/index data (semantic order [?]).
+type MatrixIntData struct {
+	W      uint16
+	Blob   [70]byte
+	Count  uint32
+	D1     uint32 // [?]
+	D2     uint32 // [?]
+	D3     uint32 // [?]
+	Values []int32
+}
+
+func ReadMatrixIntData(r *le.Reader) (*MatrixIntData, error) {
+	m := &MatrixIntData{W: r.U16()}
+	copy(m.Blob[:], r.Bytes(70))
+	if r.Err() != nil {
+		return nil, r.Err()
+	}
+	m.Count = r.U32()
+	m.D1 = r.U32()
+	m.D2 = r.U32()
+	m.D3 = r.U32()
+	if r.Err() != nil {
+		return nil, r.Err()
+	}
+	for i := uint32(0); i < m.Count && r.Remaining() >= 4; i++ {
+		m.Values = append(m.Values, r.I32())
+	}
+	return m, r.Err()
+}
+
 // MatrixDoubleData is kTypeMatrixDoubleData(103), EMatrixDoubleData fields
 // reader `1801e0790` (D75): u16, 70B raw blob, u32 count, u32×3, then
 // count×f64 values.

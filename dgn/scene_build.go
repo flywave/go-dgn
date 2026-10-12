@@ -173,9 +173,10 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 		return nil, err
 	}
 	bsConsumed, bsCurves := assembleV8BSplines(parsed)
+	meshConsumed, meshPoints := assembleV8MeshPoints(parsed)
 	var out []scene.Entity
 	for i, p := range parsed {
-		if bsConsumed[i] {
+		if bsConsumed[i] || meshConsumed[i] {
 			continue
 		}
 		b, ok := p.Body.(*Body)
@@ -196,6 +197,12 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 			for _, pt := range a.poles {
 				e.Points = append(e.Points, pt)
 			}
+			out = append(out, e)
+			continue
+		}
+		if pts, ok := meshPoints[i]; ok {
+			e.Kind = scene.KindSolid
+			e.Points = pts
 			out = append(out, e)
 			continue
 		}
@@ -388,6 +395,40 @@ func assembleV8BSplines(parsed []Parsed) (consumed map[int]bool, curves map[int]
 		curves[i] = a
 	}
 	return consumed, curves
+}
+
+// assembleV8Meshes groups type-105 mesh heads with their adjacent Matrix
+// children (101 headers, 102/103 data blocks — D108). The DoubleData
+// blocks yield the vertices (three f64 per point); faces stay unpinned.
+// Consumed children are excluded from individual output.
+func assembleV8MeshPoints(parsed []Parsed) (consumed map[int]bool, meshes map[int][]scene.Point) {
+	consumed = map[int]bool{}
+	meshes = map[int][]scene.Point{}
+	isMatrix := func(t uint16) bool { return t == 101 || t == 102 || t == 103 }
+	for i := range parsed {
+		if parsed[i].Record.Type != 105 {
+			continue
+		}
+		var pts []scene.Point
+		found := false
+		for j := i + 1; j < len(parsed) && isMatrix(parsed[j].Record.Type); j++ {
+			b, ok := parsed[j].Body.(*Body)
+			if !ok {
+				continue
+			}
+			if v, ok := b.Value.(*element.MatrixDoubleData); ok {
+				found = true
+				for k := 0; k+2 < len(v.Values); k += 3 {
+					pts = append(pts, scene.Point{X: v.Values[k], Y: v.Values[k+1], Z: v.Values[k+2]})
+				}
+			}
+			consumed[j] = true
+		}
+		if found {
+			meshes[i] = pts
+		}
+	}
+	return consumed, meshes
 }
 
 func toMaster(tcb *V7TCB, p scene.Point) scene.Point {
@@ -614,10 +655,7 @@ func SceneV8ModelAtMaster(doc *V8Document, m *V8Model) ([]scene.Entity, error) {
 		scale = 1.0 / doc.UorPerMaster
 	}
 	var out []scene.Entity
-	for path, ch := range doc.Chunks {
-		if chunkParent(path) != m.Storage+"/"+StorageGraphics {
-			continue
-		}
+	for _, ch := range doc.chunksByParent[m.Storage+"/"+StorageGraphics] {
 		ents, err := SceneV8(ch.Space, Dir{Base: 0, Offsets: ch.Offsets})
 		if err != nil {
 			return out, err

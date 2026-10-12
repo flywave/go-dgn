@@ -113,6 +113,10 @@ func init() {
 	pn(35, func(r *le.Reader) (any, error) { return element.ReadSharedCellInst(r) })
 	pn(34, func(r *le.Reader) (any, error) { return element.ReadSharedCellDef(r) })
 	pn(103, func(r *le.Reader) (any, error) { return element.ReadMatrixDoubleData(r) })
+	// Matrix family (D108): 101 headers + 102/103 data blocks are the
+	// geometry carriers of mesh (105) and other complex containers.
+	pn(101, func(r *le.Reader) (any, error) { return element.ReadMatrixHeader(r) })
+	pn(102, func(r *le.Reader) (any, error) { return element.ReadMatrixIntData(r) })
 	// type87 sits in the Group2D3D bucket but has a single impl class —
 	// register both ext variants to the same reader (D76)
 	p0(87, func(r *le.Reader) (any, error) { return element.ReadRasterHeader(r) })
