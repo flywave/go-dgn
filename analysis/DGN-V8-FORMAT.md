@@ -14,9 +14,20 @@
   ODA 经 `oless.dll::openStructuredStorageEx` 打开（`FUN_1809ebdc0 @1809ebdc0`）。
 - 版本探测：**先试 CFB，失败回落 v7 模块 `TG_Dgn7IO`**（impl 版本字段置7；>7 为 v8）
   —— `OdDgDatabase::readFile @180536190/180536180`。
-- **流名**（UTF-16 rdata 簇 0xa2f820–0xa2f900，观察）：
-  `Dgn~ULC`（主数据流，`szDgnULCStream`）、`Dgn~H`、`Dgn~Mf`、`Dgn~Mh`、`Dgn~Mix`、
-  `Dgn~S`、`Oda~SH`（用途 [?]）；外加 OLE 标准流（SummaryInformation 等）。
+- **流名**（UTF-16 rdata 簇 0xa2f820–0xa2f900，观察；用途已由金样定性 D94；Mix/Mf/Mh 为 `OdDgChunk::create` 按名分派的专用子类 D99）：
+  `Dgn~ULC`（主数据流，`szDgnULCStream`）、`Dgn~H`（设计头：**20B 未压缩前缀 =
+  type9 头体的前 20 字节**（u16=1,u16=4,u32×4=0）+ 其余 zlib（20+1576=1596=0x63C，
+  D100）；payload（解压后）@320=revision，与 OLE Revision Number 互证）、`Dgn~Mf`（根辅助表 276B：金样
+  首 u32=0x110=272=len−4、余零，内部表布局 [?]）、`Dgn~Mh`（每模型一张 4.6KB 级模型表：
+  金样首 u32 族 (2,8,0x66)/(1,0,0)/(2,8,9)，内部表布局 [?]）、`Dgn~Mix`（模型索引，见 §2.5）、
+  `Dgn~S`（空闲图 0xFF）、`Oda~SH`（16B GUID）；外加 OLE 标准流（SummaryInformation 等）。
+- **目录布局（金样观察）**：`Dgn-Md/#NNNNNN/` 每模型一个 storage（含 `Dgn~Mh`、
+  `Dgn^G`(图形 `$` 块)、`Dgn^C`(控制)、`Dgn^GA`/`Dgn^CA`(属性镜像) 与 `^AH`(u32 代次)）；
+  根级 `Dgn^Nm/`(文件级表元素) `Dgn^NmA/`(名字堆) `Dgn^Ix/`(索引)。
+  Go 读取器按全路径遍历（`Dgn-Md/#000000/Dgn^G/$1`），**CFB v3 目录项
+  start@116/size@120**（v3/v4 同偏移；早期读 120/124 会把全部 size 读成 0）。
+- **解码顺序**：godgn 按 CFB 分配序单遍共享窗口解码（超集实现）；实证每流=独立
+  zlib 单帧、写侧无跨块状态 ⇒ 任意序等价（D97；旧"必须按分配序"降级为兼容性选择）。
 
 ## 2. Chunk 层
 
@@ -28,14 +39,50 @@
 | `OdDgZipChunk` | 其余 | 56B | 压缩参数@+6 |
 
 - chunk 裸缓冲：`vt+0x68`=数据指针，`vt+0x70`=长度（`OdDgProxyChunk::read @180568420` 直接 memcpy）。
-- **ElementChunk 缓冲布局（观察 `@1809dbf20/@1809dc670`）**：
+- **ElementChunk 流布局（金样+读写双证，D94/D96）**：
   ```
-  offset 0: u32 count        # 待建偏移条目数
-  offset 4: u32 flags        # bit0 → 对象+0x44, bit2 → +0x45
-  offset 8…: 元素记录区（首条目预期=8，[?] 种子值来源 U7b 残留）
+  [u32 count][u32 flags][u32 x][u32 y]   # 16B 头（prefixLen）
+  [zlib 单帧 payload]                     # 解压后=纯记录区
   ```
-- **偏移索引 = 增量推导（非文件表）**：`off[0]=seed`；`off[i+1] = off[i] + u32@record(off_i + 8)*2 + 4`；
-  终止：`u32@record(off)≠0` 或越界（ODA 接受部分计数）；一致性校验失败抛错5。
+  读侧：`FUN_1809ea120` 解压（`FUN_1809e80c0` 单次 `oda_z_uncompress`，头保留）后
+  rdInt32×4；count→记录数、flags→obj+0x40（bit0→+0x44、bit1→+0x45，`FUN_1809dbf20`）、
+  x→obj+0x44(u32)、y→obj+0x48；偏移种子=prefixLen（`FUN_1809dc670`）。
+  写侧：空块初始化（`FUN_1809dcad0`）=[0][2][**nameSuffix**][0]；保存
+  （`FUN_1809ea640`，vt+0xa0）=[count][2][0][count]+逐元素序列化+
+  `FUN_1809e8470` 单次 `oda_z_compress`（无跨块字典/状态）。
+  金样四族：[c][2][1][c] / [0][2][1][0] / [c][3][1][c] / [c][3][0][0]
+  （flags=3 与 (0,0) 族疑旧版本写路径 [?]）。无 zlib 头的遗留形态：
+  offset 8 起直接存记录（count/flags 同位）。
+- **记录区（解压后）**：纯记录链，`off[0]=prefixLen`（解压视图下=0）；
+  `off[i+1] = off[i] + u32@(off_i+8)*2 + 4`；
+  终止：`u32@record(off)≠0`（尾部名字堆起点，如 "Master Model"）或越界；
+  **4 字节空槽合法**（A=0,type=0,B=0，尾随零填充）。旧"首条目预期=8"仅适用未压缩形态。
+- **偏移索引 = 增量推导（非文件表）**（同上；一致性校验失败抛错5）。
+- **§2.4 Zip 块压缩语义（勘误版，D97 取代 D94 旧述）**：
+  - **每条 zip 承载流 = 恰好 1 个完整 zlib 帧**（3 个 v8 金样共 27 流全部实证；
+    Python `zlib.decompress` 全格式校验通过 ⇒ **adler32 全部有效**——旧"段尾 adler=0
+    不可信/多段分段"为字节扫描分段器伪影）。
+  - ODA 读侧 `FUN_1809e80c0` = 单次 `oda_z_uncompress`（-5 重试仅缓冲不足）；
+    写侧 `FUN_1809e8470` = 单次 `oda_z_compress`，**无跨块字典/压缩状态**
+    ⇒ **压缩字节与块间写序无关**。
+  - 金样6种解码序（分配/逆分配/名字/尺寸/每流独立/每段独立）**全部字节一致**
+    ⇒ 任何序均无损；跨段/跨流回引用在金样中不存在。
+  - godgn `zipWindow` 共享窗口实现为**超集**（无回引用时字典闲置=独立解码）保持，
+    以容忍未来可能出现的多段/回引用帧；`Dgn~H` 等流在 zlib 前有未压缩前缀（20B）。
+  - 实现注记：`compress/zlib` 在 FDICT=0 时丢弃预设字典且内部 bufio 破坏定位 ——
+    用 `flate.NewReaderDict` + `bytes.Reader`（实现 io.ByteReader 不被缓冲）。
+- **§2.5 Dgn~Mix 模型索引（写侧 `FUN_1805cbed0` 全字段解，D98）**：
+  文件信封 `[u32 magic=0xAA00BA11][u32 ver=4][u32 count][u32 0]`；每模型记录 =
+  **lead16B**{u16 flags(bit0..bit3 自 CDGModel: +0x1224&1 / vt+0xf8 / +0x1224>>3&1 /
+  +0x1420≠0)、u16 @impl+0x1202、u32 **modelNumber=@impl+0xb0**（模型序号，
+  `FUN_1805cc340` 分配 max+1）、f64 **时间戳**（OdTimeStamp×1000 ms；金样
+  1228805552000 → 2008-12-09T06:52:32Z）} + **名字头16B**{**u16 entrySize =
+  0x20+短名字节+长名字节+extra字节**（金样 0x54/0x56/0x4a 即此值）、u16 短名长、
+  u32 长名长（两个 u16 写）、u16 extra 尺寸、u16 @impl+0x12b0、u32 末槽（写侧
+  25.4=字面0，金样非0=1/0x03e8ceb8/0x0022d850，疑旧版本 ID/hash，读侧未见消费
+  [?]} + 短名UTF-16 + 长名UTF-16 + extra 尾块（金样16B，首 u32=0x40）。
+  实例：attach="Model"+"Default Model"/"Model for 2d elements"（2 模型）；
+  attach1="Default"+"Master Model"；odwriteex="Model"+"Master Model"（extra=0 无尾块）。
 
 ## 3. 元素记录布局
 
@@ -47,7 +94,7 @@
 
 | 偏移 | 宽 | 字段 | 语义 |
 |---:|---:|---|---|
-| 0 | u32 | A | [?]（目录停止条件：A≠0 终止偏移推导） |
+| 0 | u32 | A | [?]（目录停止条件：A≠0 终止偏移推导；A≠0 区段=尾部名字堆，如 "Master Model"） |
 | 4 | u16 | **type** | `OdDgElement::ElementTypes`（见 §5） |
 | 6 | u16 | **flags** | bit12=显示头存在；bit13=复杂元素；bit14=附加4B |
 | 8 | u32 | **B** | 条目/体尺寸字数：`总长 = B*2 + 4`（目录步进公式，观察） |
@@ -131,6 +178,7 @@ slot/offset→原语：`0x58` filerType、`0x78` seek(abs/rel)、`0x80` tell、`
 
 | type | 2D | 3D | 备注 |
 |---:|---|---|---|
+| 9 DesignFileHeader | 体=**0x63C 字节定长**（v8 `OdDgDesignFileHeaderData::read@180567a30` 汇编级+initialize+write 三方互证，D100；v8 存于 Dgn~H：前 20B 未压缩+zlib 余量） | 同 | 见下方 §7.0 字段偏移表 |
 | 3 Line | Pt2d×2 (32B) | Pt3d×2 (48B) | |
 | 4 LineString | `u32 count, u32 flags, n×Pt2d` | `n×Pt3d(24B)` | count>10000→`(剩余)>>4` 钳制；成员虚表 slot8 分流 16/24B（`1802e60c0/1802e63a0`） |
 | 6 Shape | 同4 + 读取器置 hole 标志 | 同4-3D | slot14 分支=flag+NaN 填充族 |
@@ -146,11 +194,49 @@ slot/offset→原语：`0x58` filerType、`0x78` seek(abs/rel)、`0x80` tell、`
 | 24 BSplineSurf | `u32×10`（复杂） | 同 | |
 | 25 Boundary | `u32, u32(count), n×Pt2d` | 同 | |
 | 26/28 Knots/Weights | **剩余全读 f64**（`(len-tell)>>3` 个） | 同 | 吃掉 linkage 区（ODA 同行为） |
-| 27 BSplineCurve | `u32×3`（复杂） | 同 | |
+| 27 BSplineCurve | `u32×3`（复杂） | 同 | v8 读写双证（D99）：#1=impl+0x240 存储字段（round-trip，getter 待钉）；**#2 写时=极点元素(+0x250)槽+0x408 返回值**（金样 0x01620162≠极点数，槽覆盖/杂值 [?]）；**#3 写时=节点元素(+0x258)同槽返回值，金样=17=极点数**（D95 经验获写侧支持）；knot 26 = **全节点向量**（21=17+order4，非钳制）；order=knots−poles |
 | 33 Dimension | 前缀188B → `n×48B 点(Pt3d+f64×2+u16×2+u32)` → 按点 u16 偏移 seek 读字符串 | 同 | wildcard 注册23子类；字符串=rdAnsi/rdUnicode+BOM |
 | 36 Multiline | 前缀152B → `n×32B 段(f64+u32×6)` → `m×40B 顶点(Pt3d+u32+u16×2+u32×2)` → `k×32B 断点(u32×2+f64×3)` | 同 | 计数：u8/u16 见 linkages… |
 | 95 TableEntry | 剩余 blob（长度=`B*2+4−off`，off∈{36,108}） | 同 | |
 | 96 TableHeader | 按 variant（§4.1） | 同 | 复杂：行=子元素 |
+
+### §7.0 type9 DesignFileHeader 体字段偏移表（D100，观察）
+
+读取入口 `OdDgDesignFileHeaderData::read @180567a30`（Data 对象位于 header impl+**0x548**；
+结构体 memset 大小 **0x648**）；写侧 `@180568570`（缓冲 0x63C）；默认值 `initialize @1805678b0`。
+文件体长 **0x63C**（chunk 长度 ≥0x63C 时才读尾数组，老文件可截断）。
+**结构偏移 vs 文件偏移**：+0x13C 处有 4B 对齐空洞 → u64 起文件偏移 = 结构偏移 − 4。
+
+| 结构+ | 文件+ | 宽×数量 | 名称 | initialize 默认 |
+|---:|---:|---|---|---|
+| 0x000 | 0x000 | u16 | （字 A） | 1 |
+| 0x002 | 0x002 | u16 | （字 B） | 4（与字 A 合成 u32=0x40001） |
+| 0x004 | 0x004 | u32×4 | [?] | 0 |
+| 0x014 | 0x014 | **u8×16** | [?] | 0 |
+| 0x024 | 0x024 | **u8×256** | [?] | 0 |
+| 0x124 | 0x124 | u32 | defaultModelIs3D | 0 |
+| 0x128 | 0x128 | u32 | **version** | 8 |
+| 0x12C | 0x12C | u32 | **subVersion** | 0x68 |
+| 0x130 | 0x130 | u32 | **format** | 2 |
+| 0x134 | 0x134 | u32 | **highestModelId** | 0xFFFFFFFF |
+| 0x138 | 0x138 | u32 | **defaultModelID** | 0 |
+| 0x140 | **0x13C** | **u64** | **highestUniqueId** | 0 |
+| 0x148 | 0x144 | **f64** | **lastSaveTime**（ms；NaN/Inf→0；Oda~SH 哈希用 /1000） | now() |
+| 0x150 | 0x14C | u32 | **nextGraphicGroup** | 0 |
+| 0x154 | 0x150 | u32 | **nextTextNode** | 1 |
+| 0x158 | 0x154 | u32 | [?] | 0 |
+| 0x15C..0x31F | 0x158 | **u32×113** | [?] | 0 |
+| 0x320..0x328 | 0x31C | u32×3 | [?] | 0 |
+| 0x32C | 0x328 | u32 | **originalFormat** | 2 |
+| 0x330 | 0x32C | u32 | **modelSpecificDigitalSignatures** | 0 |
+| 0x334 | 0x330 | u32 | **fileWideDigitalSignatures** | 0 |
+| 0x338 | 0x334 | u32 | **primaryApplicationID** | 0 |
+| 0x33C..0x63B | 0x338 | **u32×193** | [?]（条件读） | 0 |
+| 0x640 | —（体外） | u32 | Oda~SH 派生值（按 lastSaveTime/1000 字节和索引） | — |
+
+金样互证：Dgn~H 未压缩前缀 20B = 体头 20B（01 00 04 00 + 16B 零）✓；
+attach 体 20+1576=1596=0x63C ✓。读取语义：slot0x98=read(buf,n)、slot0x90=readInt8（汇编实证，
+伪代码曾误型为 int64 数组）。
 
 通用规则：体解码后 `tell()&1 → rdInt8` 对齐；`k2dTo3d/k3dTo2d(10/11)` 分支读路径不可达。
 
@@ -177,17 +263,26 @@ slot/offset→原语：`0x58` filerType、`0x78` seek(abs/rel)、`0x80` tell、`
 
 | 规范节 | 包 |
 |---|---|
-| §1 | `dgn.Open/OpenBytes`（ErrUnsupportedV7）、`dgn/streams.go` |
-| §2 | `dgn.BuildChunkIndex`、`cfb` |
+| §1 | `dgn.Open/OpenBytes`、`dgn/streams.go`、`internal/cfb`（全路径遍历 + v3 偏移 + 分配序 Start） |
+| §2 | `dgn/v8zip.go`（zipWindow 共享窗口=超集，金样单帧即可）、`dgn/v8chunk.go`（ParseV8Chunk/ParseElements）、`dgn.BuildChunkIndex`（未压缩遗留） |
+| §2.5 | `dgn/v8file.go`（parseMixIndex） |
 | §3 | `dgn/{header,parse,dir}.go`（ParseHeader/Display/ParseAll/Walk） |
 | §4 | `dgn/dispatch.go`（Key/ps/pn/p0/p3/RegisterWildcard） |
 | §6 | `internal/le` + `filer-api.md` |
 | §7 | `dgn/element/*`（24 解码器 + ReadDString） |
 | §8 | `dgn/linkage`、`dgn/xattr` |
+| §9 文档层 | `dgn/v8file.go`（File.V8 → V8Document/V8Model/Tables/Aux/Raw） |
+| scene | `dgn/scene_build.go` SceneV8（含 v8 B 样条组装 assembleV8BSplines） |
 | v7 | `dgn/v7.go/v7body.go`（帧/core/LINE/multipoint） |
 
 ## 10. 已知未知（实现护栏）
 
-U1 种子值/流用途[?] · U5 头字段A/C/Tail 与显示头语义 · U8 写回校验和 · U10b 逐 linkage payload ·
-U13b Dimension 串接线 · **U14 Arc3d start/sweep**（GDAL 端点制暗示）· v8 真样例固化（40+ [?] 项） ·
-LibraryCell(1)/TableHeader(96 impl) 零星考证。
+~~U1 流用途~~ ✅D94 · U5 头字段A/Tail、disp u16@10 · U8 写回校验和（金样 adler 实测全部有效 D97，
+写回校验语义仍属 U8） · U10b 逐 linkage payload ·
+U13b Dimension 串接线 · ~~U15 `$` 块前缀双 u32~~ ✅D96（4×u32 头；残差=(0,0)+flags3 写路径） ·
+~~U16 Mix 信封~~ ✅D98（残差=名字头末槽 u32） · **U17(收窄)** type27 #2/#3=极点/节点元素槽读出、
+C=极点数 ✅（#2 值杂、#1 getter 待钉） ·
+Dgn~Mh/Mf 表内部布局（金样字节观察 D99，逐字段仍 [?]；~~Dgn~H~~ ✅=type9 头体 D100） ·
+~~滑窗写序=分配序近似~~ ✅D97 改判：**每块独立压缩，写序无语义**（godgn 共享窗口=超集保留） ·
+~~v8 真样例固化~~ ✅ 金样 v8_attach{,1}.dgn+odwriteex.dgn（D94/D95/D97）。
+注意：25.4 写侧 adler 槽位有效（D97）；"段尾 adler=0"为旧分段器伪影。
