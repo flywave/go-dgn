@@ -935,6 +935,36 @@ func SceneV8ModelAtMaster(doc *V8Document, m *V8Model) ([]scene.Entity, error) {
 	return out, nil
 }
 
+// SceneV8SharedCellDefs builds scene entities for the shared-cell
+// definition library (Dgn^Nm/$N chunks, outside every model storage).
+// Real files keep SharedCellDefinition (type 34) elements there — the
+// 0x2716 dependency roots of model-space SharedCellInstance references
+// point into these chunks (TxDOT Matt23: 12 refs → 9 defs, all in
+// Dgn^Nm/$2 and $3; D135). Definition-space children carry flag bit14
+// (DefnOnly) so they render only through CellRef instances, mirroring
+// the v7 type-34 span semantics (D93).
+func SceneV8SharedCellDefs(doc *V8Document) ([]scene.Entity, error) {
+	scale := 1.0
+	if doc.UorPerMaster > 0 {
+		scale = 1.0 / doc.UorPerMaster
+	}
+	var out []scene.Entity
+	for _, ch := range doc.chunksByParent[StorageTables] {
+		ents, err := SceneV8(ch.Space, Dir{Base: 0, Offsets: ch.Offsets})
+		if err != nil {
+			continue
+		}
+		for i := range ents {
+			scaleEntity(&ents[i], scale)
+			// the whole Dgn^Nm space is definition space: its geometry
+			// renders only through CellRef instances, never top-level.
+			ents[i].DefnOnly = true
+		}
+		out = append(out, ents...)
+	}
+	return out, nil
+}
+
 func scaleEntity(e *scene.Entity, k float64) {
 	if k == 1 {
 		return
