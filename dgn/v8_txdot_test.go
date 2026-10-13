@@ -75,15 +75,15 @@ func TestV8RealTxDOTSharedCellChain(t *testing.T) {
 }
 
 func TestV8RealTxDOTGeometry(t *testing.T) {
-	// Assembled-curve counts after the knotless-Bézier fix (D137): the
-	// dominant real-file shape [21,28] (weights count == poles count, no
-	// type-26 element) now assembles as a rational Bézier — the only
-	// order consistent with zero interior knots. Matt23: 1514/1638
-	// headers assembled; the residue is other follower shapes.
+	// 1638/1638 headers assemble (D138): the knotless-Bézier fix (D137)
+	// plus the dual knot-vector semantics — header property bit
+	// 0x08000000 marks fully expanded knots (k=p+order), its absence
+	// means interior knots (k=p−order); both orders came out 4 on the
+	// whole real corpus.
 	for name, wantCurve := range map[string]int{
-		"txdot-matt23.dgn":    1514,
-		"txdot-bb-afl-24.dgn": 9,
-		"txdot-bb-b20-12.dgn": 27,
+		"txdot-matt23.dgn":    1638,
+		"txdot-bb-afl-24.dgn": 71,
+		"txdot-bb-b20-12.dgn": 213,
 	} {
 		doc := loadV8Real(t, name)
 		ents, err := SceneV8ModelAtMaster(doc, doc.Models[0])

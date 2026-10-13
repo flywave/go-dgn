@@ -507,11 +507,33 @@ func assembleV8BSplines(parsed []Parsed) (consumed map[int]bool, curves map[int]
 			for k := 0; k < order; k++ {
 				a.knots = append(a.knots, 1)
 			}
-		} else {
+		} else if len(a.knots) > len(a.poles) {
+			// Fully expanded vector: k = poles + order (ODA stores either
+			// this or interior knots k = poles − order — real files carry
+			// both; the k-vs-poles relation separates them cleanly, D138.
+			// The header B word correlates but is not reliable across
+			// writers: attach1 B=0x1620162 expanded without the bit set
+			// in Matt23's flag, and vice versa). Knots stay as recorded.
 			order = len(a.knots) - len(a.poles)
 			if order < 2 {
 				continue
 			}
+		} else {
+			// Interior-knots vector (no 0x80000000 bit: k = poles − order,
+			// D138) — expand to the full clamped form the scene carries.
+			order = len(a.poles) - len(a.knots)
+			if order < 2 {
+				continue
+			}
+			full := make([]float64, 0, len(a.knots)+2*order)
+			for k := 0; k < order; k++ {
+				full = append(full, 0)
+			}
+			full = append(full, a.knots...)
+			for k := 0; k < order; k++ {
+				full = append(full, 1)
+			}
+			a.knots = full
 		}
 		a.degree = order - 1
 		for _, j := range cand {
