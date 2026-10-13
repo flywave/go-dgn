@@ -15,3 +15,5 @@ analysis/evidence/ghidra/project/
 # Oversized decompilation dumps (>10MB; regenerable via Ghidra scripts)
 analysis/evidence/ghidra/out/*.allvft.txt
 analysis/evidence/ghidra/out/*.functions.tsv
+
+ref/
