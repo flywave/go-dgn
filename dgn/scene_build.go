@@ -485,12 +485,33 @@ func assembleV8BSplines(parsed []Parsed) (consumed map[int]bool, curves map[int]
 				break
 			}
 		}
-		if !good || len(a.poles) != int(hc.C) || a.knots == nil {
+		if !good || len(a.poles) != int(hc.C) {
 			continue
 		}
-		order := len(a.knots) - len(a.poles)
-		if order < 2 {
-			continue
+		var order int
+		if a.knots == nil {
+			// Knotless curves — the dominant real-file shape (TxDOT
+			// Matt23: 1293 of 1638 headers are [21,28] with weights
+			// count == poles count, D136). Zero interior knots leaves
+			// exactly one consistent order: poles (a Bézier — rational
+			// when weights are present; the standard CAD arc form).
+			// Clamp a uniform full [0,1] knot vector.
+			order = len(a.poles)
+			if order < 2 {
+				continue
+			}
+			a.knots = make([]float64, 0, 2*order)
+			for k := 0; k < order; k++ {
+				a.knots = append(a.knots, 0)
+			}
+			for k := 0; k < order; k++ {
+				a.knots = append(a.knots, 1)
+			}
+		} else {
+			order = len(a.knots) - len(a.poles)
+			if order < 2 {
+				continue
+			}
 		}
 		a.degree = order - 1
 		for _, j := range cand {
