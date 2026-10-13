@@ -16,7 +16,8 @@ func TestTerrainDecodeFromHeaps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	meshes := DecodeTerrainHeaps(doc)
+	meshes, features := DecodeTerrainHeaps(doc)
+	_ = features
 	if len(meshes) == 0 {
 		t.Fatal("no terrain mesh decoded from heaps")
 	}
@@ -117,5 +118,42 @@ func TestTerrainDelaunayTIN(t *testing.T) {
 	}
 	if len(used) != V {
 		t.Fatalf("only %d of %d vertices used by the TIN", len(used), V)
+	}
+	// constraint recovery effect: the 0x131 feature polyline edges must be
+	// honored by the recovered TIN (unconstrained Delaunay only kept 116)
+	meshes2, features := DecodeTerrainHeaps(doc)
+	_ = meshes2
+	featEdges := map[[2]int]bool{}
+	for i := 0; i+1 < len(features); i++ {
+		a, b := features[i], features[i+1]
+		if a == b || a < 0 || b < 0 || a >= 428 || b >= 428 {
+			continue
+		}
+		e := [2]int{a, b}
+		if a > b {
+			e = [2]int{b, a}
+		}
+		featEdges[e] = true
+	}
+	hit := 0
+	for fe := range featEdges {
+		found := false
+		for _, f := range e.Faces {
+			for k := 0; k < 3; k++ {
+				a, b := f[k], f[(k+1)%3]
+				if int(a) == fe[0] && int(b) == fe[1] || int(a) == fe[1] && int(b) == fe[0] {
+					hit++
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+	t.Logf("feature edges=%d honored by TIN=%d (%.1f%%)", len(featEdges), hit, float64(hit)*100/float64(len(featEdges)))
+	if hit < len(featEdges)*9/10 {
+		t.Fatalf("only %d/%d feature edges honored", hit, len(featEdges))
 	}
 }
