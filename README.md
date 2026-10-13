@@ -60,7 +60,16 @@ tunneling 等）提供真实 DGN 样本（放入 `dgn/testdata/` 并注明来源
    重建为精确 B-rep（D114–D116，归档 5 个 SAT 样本已全闭环）；Parasolid(1)
    载荷用于确认判别位。
 3. **带网格(105)与 Solid(18/19) 的 BIM 文件**：扩充 D111 的真实样本矩阵。
+4. **v7/v8 terrain 工作文件**：OpenRoads 地形（*TERRAIN*.dgn，含
+   0x58EC Terrain XAttribute 家族与 0x131 FeatureTopology）——用于
+   breakline 约束边的顶点空间对齐（D152–D155：428 顶点 TIN 的特征边
+   保真已 94.8%，完整 2506 顶点空间的坐标源待定位）。
+
+> 最新进展（D150/D155）：TxDOT 五件真实 v8 标准图已入库并全链接入
+> go-topo（含 428 顶点/842 面特征保真 TIN 与 1062 实例 SharedCell 压力
+> 实证）；公开渠道（六面合围）确认 3D 语料封闭于云盘/登录墙，样本获取
+> 依赖业务侧提供。
 
 完整需求清单/验证点/Parasolid 离线细分替代路径见
-`analysis/05-go-design/sample-request.md`（D119 工单）。样本只读解析，
-不外发。联系 go-dgn 维护者即可。
+`analysis/05-go-design/sample-request.md`（D119 工单，状态截至 D155）。
+样本只读解析，不外发。联系 go-dgn 维护者即可。
