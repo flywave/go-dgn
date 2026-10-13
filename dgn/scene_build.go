@@ -393,6 +393,13 @@ func SceneV8(space []byte, d Dir) ([]scene.Entity, error) {
 			}
 		case *element.ComplexElement:
 			e.Kind = scene.KindComplexHeader
+		case *element.BSplineSurface:
+			// v8 type 24 (same number space as v7): the 9×u32 header's
+			// field semantics are not decoded yet (D71 fixed only the
+			// length), so no pole-follower assembly is possible — but the
+			// surface must never vanish silently (D131/D132): emit a
+			// metadata-only BSplineSurface entity.
+			e.Kind = scene.KindBSplineSurface
 		default:
 			continue
 		}

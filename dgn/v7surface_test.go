@@ -151,3 +151,25 @@ func TestV7SurfaceMasterScale(t *testing.T) {
 		t.Fatalf("master-scale pole walk broken: %+v", surf)
 	}
 }
+
+// TestV8SurfaceDispatchFallback pins the v8 type-24 path (D132): the
+// 9×u32 surface header decodes but its field semantics are unknown, so
+// the scene emits a metadata-only BSplineSurface entity instead of the
+// old silent drop.
+func TestV8SurfaceDispatchFallback(t *testing.T) {
+	hdr := buildHeader(Header{Type: 24, B: 18, C: 18, ID: 7})
+	body := []byte{}
+	for _, v := range []uint32{1, 2, 3, 4, 5, 6, 7, 8, 9} {
+		body = u32le(body, v)
+	}
+	got, err := SceneV8(join(hdr, body), Dir{Base: 0, Offsets: []uint32{0}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].Kind != scene.KindBSplineSurface {
+		t.Fatalf("v8 surface dropped or misclassified: %+v", got)
+	}
+	if got[0].BSplineSurface != nil {
+		t.Fatal("undecoded header must not fabricate poles")
+	}
+}
