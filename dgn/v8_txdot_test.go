@@ -104,3 +104,31 @@ func TestV8RealTxDOTGeometry(t *testing.T) {
 		}
 	}
 }
+
+// TestV8RealTxDOTTerrain3DWireframe bridges the OpenRoads terrain working
+// file (D142): its graphics are true-3D — Line3d/LineString3d feature
+// lines plus a named 3D cell header; the terrain surface itself lives in
+// uncracked type-106 EC extension elements (proxy-sized, 16-48B — a
+// work order, not silently droppable geometry).
+func TestV8RealTxDOTTerrain3DWireframe(t *testing.T) {
+	doc := loadV8Real(t, "txdot-rudderplaza-terrain.dgn")
+	ents, err := SceneV8ModelAtMaster(doc, doc.Models[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	line3d, cellHeaders := 0, 0
+	for _, e := range ents {
+		switch e.Kind {
+		case scene.KindPolyline:
+			line3d++
+		case scene.KindCellDef:
+			cellHeaders++
+		}
+	}
+	if line3d < 100 {
+		t.Fatalf("3D feature polylines=%d, want >=100", line3d)
+	}
+	if cellHeaders != 1 {
+		t.Fatalf("CellHeader3d entities=%d, want 1 (0x56d2 named)", cellHeaders)
+	}
+}
