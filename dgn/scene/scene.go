@@ -12,19 +12,20 @@ import "fmt"
 type Kind uint8
 
 const (
-	KindInvalid       Kind = iota
-	KindSegment            // two-point straight line
-	KindPolyline           // multi-segment line / shape / bspline poles
-	KindArc                // circular arc (start/sweep + two axes)
-	KindEllipse            // full ellipse (arc with fixed 0/360 sweep)
-	KindPointString        // unconnected points
-	KindCone               // frustum: two centers + two radii
-	KindSolid              // mesh solid (v8); no IR geometry yet
-	KindText               // text node; Origin + optional string
-	KindCellDef            // cell/block definition with placement transform
-	KindCellRef            // shared-cell reference (name only)
-	KindComplexHeader      // complex group header (children carry geometry)
-	KindBSplineCurve       // B-spline curve (v7 type 27 + pole/knot siblings)
+	KindInvalid        Kind = iota
+	KindSegment             // two-point straight line
+	KindPolyline            // multi-segment line / shape / bspline poles
+	KindArc                 // circular arc (start/sweep + two axes)
+	KindEllipse             // full ellipse (arc with fixed 0/360 sweep)
+	KindPointString         // unconnected points
+	KindCone                // frustum: two centers + two radii
+	KindSolid               // mesh solid (v8); no IR geometry yet
+	KindText                // text node; Origin + optional string
+	KindCellDef             // cell/block definition with placement transform
+	KindCellRef             // shared-cell reference (name only)
+	KindComplexHeader       // complex group header (children carry geometry)
+	KindBSplineCurve        // B-spline curve (v7 type 27 + pole/knot siblings)
+	KindBSplineSurface      // B-spline surface (v7 type 24 + knot/pole siblings); metadata-only when assembly fails
 )
 
 // String returns the kind name for debugging/golden tests.
@@ -54,6 +55,8 @@ func (k Kind) String() string {
 		return "ComplexHeader"
 	case KindBSplineCurve:
 		return "BSplineCurve"
+	case KindBSplineSurface:
+		return "BSplineSurface"
 	}
 	return fmt.Sprintf("Kind(%d)", uint8(k))
 }
@@ -84,6 +87,21 @@ type BRep struct {
 	Flag2 uint16
 	Scale float64
 	Data  []byte
+}
+
+// BSplineSurface carries a v7 type-24 B-spline surface (D131). Poles is a
+// v-major grid ([v][u]); UKnots/VKnots are the full expanded knot vectors
+// (order×0 + interior + order×1, matching KindBSplineCurve's Knots
+// semantics); Weights is nil for non-rational surfaces. The type-25
+// boundary (trim loop) elements are not carried yet — faces are built
+// untrimmed over the full parametric rectangle (approximation, D131).
+type BSplineSurface struct {
+	Poles   [][]Point
+	Weights [][]float64
+	UKnots  []float64
+	VKnots  []float64
+	UDegree int
+	VDegree int
 }
 
 // Entity is one geometry-bearing element in a scene.
@@ -121,4 +139,8 @@ type Entity struct {
 	// the 0x2716 dependency linkage's element-id root. 0 = unknown (the
 	// name-based v7 path resolves definitions instead).
 	DefID uint64
+	// BSplineSurface carries v7 type-24 surface geometry (D131); nil for
+	// surfaces whose sibling assembly failed (the entity is still emitted
+	// — a surface never vanishes silently — but carries no poles).
+	BSplineSurface *BSplineSurface
 }

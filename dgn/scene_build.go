@@ -13,6 +13,7 @@ import (
 func SceneV7(doc V7Document) []scene.Entity {
 	var out []scene.Entity
 	bsConsumed, bsCurves := assembleV7BSplines(doc.Elements, doc.Header.Is3D)
+	bsSurfConsumed, bsSurfaces := assembleV7BSplineSurfaces(doc.Elements)
 	var walk func(nodes []V7Node, parent uint64, defn bool)
 	walk = func(nodes []V7Node, parent uint64, defn bool) {
 		for _, n := range nodes {
@@ -40,8 +41,8 @@ func SceneV7(doc V7Document) []scene.Entity {
 				e.Kind = scene.KindSegment
 				e.Points = []scene.Point{v7pt(pts[0]), v7pt(pts[1])}
 			case 4, 6, 11, 21:
-				if el.Type == 21 && bsConsumed[el.Offset] {
-					continue // pole element consumed by a type-27 curve
+				if el.Type == 21 && (bsConsumed[el.Offset] || bsSurfConsumed[el.Offset]) {
+					continue // pole element consumed by a bspline header
 				}
 				pts, err := ReadV7MultiPoint(el, doc.Header.Is3D)
 				if err != nil {
@@ -71,6 +72,37 @@ func SceneV7(doc V7Document) []scene.Entity {
 				e.Weights = a.weights
 				for _, p := range a.poles {
 					e.Points = append(e.Points, scene.Point{X: p.X, Y: p.Y, Z: p.Z})
+				}
+			case 24:
+				// A type-24 surface ALWAYS yields an entity: a failed
+				// sibling assembly comes through as a metadata-only
+				// surface (nil BSplineSurface), never a silent drop
+				// (D131 — the old default branch dropped real surfaces
+				// from the scene entirely).
+				e.Kind = scene.KindBSplineSurface
+				if a, ok := bsSurfaces[el.Offset]; ok {
+					sp := &scene.BSplineSurface{
+						UKnots:  a.uKnots,
+						VKnots:  a.vKnots,
+						UDegree: a.uDegree,
+						VDegree: a.vDegree,
+					}
+					sp.Poles = make([][]scene.Point, a.polesV)
+					for v := 0; v < a.polesV; v++ {
+						row := make([]scene.Point, a.polesU)
+						for u := 0; u < a.polesU; u++ {
+							p := a.poles[v*a.polesU+u]
+							row[u] = scene.Point{X: p.X, Y: p.Y, Z: p.Z}
+						}
+						sp.Poles[v] = row
+					}
+					if a.weights != nil {
+						sp.Weights = make([][]float64, a.polesV)
+						for v := 0; v < a.polesV; v++ {
+							sp.Weights[v] = a.weights[v*a.polesU : (v+1)*a.polesU]
+						}
+					}
+					e.BSplineSurface = sp
 				}
 			case 16:
 				a, err := ReadV7Arc(el, doc.Header.Is3D)
@@ -160,6 +192,13 @@ func SceneV7AtMaster(doc V7Document) []scene.Entity {
 		}
 		e.Radii[0] *= tcb.Scale
 		e.Radii[1] *= tcb.Scale
+		if sp := e.BSplineSurface; sp != nil {
+			for v := range sp.Poles {
+				for u := range sp.Poles[v] {
+					sp.Poles[v][u] = toMaster(tcb, sp.Poles[v][u])
+				}
+			}
+		}
 		e.BBox[0] = toMaster(tcb, e.BBox[0])
 		e.BBox[1] = toMaster(tcb, e.BBox[1])
 		if e.Transform != nil {
@@ -727,6 +766,142 @@ func assembleV7BSplines(els []V7Element, is3d bool) (consumed map[int]bool, curv
 		curves[els[i].Offset] = a
 	}
 	return consumed, curves
+}
+
+// v7BSplineSurfaceAssembly is a successfully assembled v7 type-24
+// surface: the flat pole array is row-major v-major (pole index =
+// v*polesU + u; GDAL/dgnlib do not parse surface followers, so the
+// ISFF row-major layout is the working convention — real-sample
+// validation point, D131). Knot vectors are full expanded
+// (order×0 + interior + order×1), matching curve semantics.
+type v7BSplineSurfaceAssembly struct {
+	polesU, polesV int
+	poles          []V7PointF
+	uKnots, vKnots []float64
+	weights        []float64 // nil = non-rational; len = polesU*polesV
+	uDegree        int
+	vDegree        int
+}
+
+// assembleV7BSplineSurfaces pairs each type-24 header with its adjacent
+// knot/pole/weight siblings (mirror of assembleV7BSplines: knots first —
+// u then v — then poles in one or more type-21 records, optional type-28
+// weights). Closed surfaces (UProperties/VProperties & 0x80) are rejected
+// for now: their wrap layout is unverified and a wrong rebuild is worse
+// than an honest metadata-only entity (better-missing-than-wrong). Failed
+// assemblies leave the header unconsumed so the scene walk still emits the
+// entity.
+func assembleV7BSplineSurfaces(els []V7Element) (map[int]bool, map[int]v7BSplineSurfaceAssembly) {
+	consumed := map[int]bool{}
+	surfaces := map[int]v7BSplineSurfaceAssembly{}
+	for i := 0; i < len(els); i++ {
+		if els[i].Type != 24 || els[i].Deleted {
+			continue
+		}
+		h, err := ReadV7BSplineSurfaceHeader(els[i])
+		if err != nil {
+			continue
+		}
+		if h.UProperties&0x80 != 0 || h.VProperties&0x80 != 0 {
+			continue
+		}
+		rational := h.UProperties&0x40 != 0 || h.VProperties&0x40 != 0
+		polesU, polesV := int(h.NumPolesU), int(h.NumPolesV)
+		if h.UOrder < 2 || h.VOrder < 2 || polesU < int(h.UOrder) || polesV < int(h.VOrder) {
+			continue
+		}
+		total := polesU * polesV
+		var uInt, vInt, flatW []float64
+		var flatPoles []V7PointF
+		var cand []int
+		ok := true
+		for j := i + 1; j < len(els); j++ {
+			t := els[j].Type
+			if t != 26 && t != 21 && t != 28 {
+				break // next logical element (e.g. the next surface header)
+			}
+			if els[j].Deleted {
+				ok = false
+				break
+			}
+			switch t {
+			case 26:
+				k, err := ReadV7KnotWeights(els[j])
+				if err != nil || len(flatPoles) != 0 || len(flatW) != 0 {
+					ok = false
+					break
+				}
+				if len(uInt) == 0 {
+					uInt = k
+				} else if len(vInt) == 0 {
+					vInt = k
+				} else {
+					ok = false
+					break
+				}
+				cand = append(cand, j)
+			case 21:
+				p, err := ReadV7MultiPointF(els[j], true)
+				if err != nil {
+					ok = false
+					break
+				}
+				flatPoles = append(flatPoles, p...)
+				cand = append(cand, j)
+			case 28:
+				w, err := ReadV7KnotWeights(els[j])
+				if err != nil || len(flatW) != 0 {
+					ok = false
+					break
+				}
+				flatW = w
+				cand = append(cand, j)
+			}
+			if !ok {
+				break
+			}
+		}
+		if !ok || len(flatPoles) != total ||
+			(int(h.NumKnotsU) > 0 && len(uInt) != int(h.NumKnotsU)) ||
+			(int(h.NumKnotsV) > 0 && len(vInt) != int(h.NumKnotsV)) {
+			continue
+		}
+		if rational && len(flatW) != total {
+			continue
+		}
+		if !rational && len(flatW) != 0 {
+			continue
+		}
+		var a v7BSplineSurfaceAssembly
+		a.polesU, a.polesV = polesU, polesV
+		a.poles = flatPoles
+		a.uDegree = int(h.UOrder) - 1
+		a.vDegree = int(h.VOrder) - 1
+		a.uKnots = expandV7Knots(uInt, int(h.UOrder))
+		a.vKnots = expandV7Knots(vInt, int(h.VOrder))
+		if rational {
+			a.weights = flatW
+		}
+		for _, j := range cand {
+			consumed[els[j].Offset] = true
+		}
+		surfaces[els[i].Offset] = a
+	}
+	return consumed, surfaces
+}
+
+// expandV7Knots builds the full clamped knot vector from the interior
+// knots recorded in a type-26 element (assembleV7BSplines convention).
+func expandV7Knots(interior []float64, order int) []float64 {
+	out := make([]float64, 0, order+len(interior)+order)
+	for k := 0; k < order; k++ {
+		out = append(out, 0)
+	}
+	out = append(out, interior...)
+	for k := 0; k < order; k++ {
+		out = append(out, 1)
+	}
+	return out
 }
 
 // SceneV8ModelAtMaster builds the scene entities of one v8 model and maps
