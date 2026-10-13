@@ -12,6 +12,7 @@ import (
 	"encoding/binary"
 	"math"
 
+	"github.com/flywave/go-delaunay"
 	"github.com/flywave/go-dgn/dgn/scene"
 )
 
@@ -126,6 +127,12 @@ func cloneF64(b []byte) []float64 {
 // surfaces them as KindSolid mesh entities (same entity shape as the v8
 // mesh 105 path, so the go-topo bridge consumes them unchanged). Terrain
 // XAttribute coordinates are already in master units — no UOR scaling.
+//
+// When the xattr family carries no explicit triangle table (the OpenRoads
+// norm — triangulation is kernel-generated, D148), the TIN is rebuilt
+// with an unconstrained Delaunay triangulation over the decoded vertex
+// XY set (D150): the 428-vertex TxDOT terrain yields ~840 triangles that
+// cover every vertex.
 func SceneV8Terrain(doc *V8Document) ([]scene.Entity, error) {
 	var out []scene.Entity
 	for _, m := range DecodeTerrainHeaps(doc) {
@@ -133,10 +140,40 @@ func SceneV8Terrain(doc *V8Document) ([]scene.Entity, error) {
 		for _, p := range m.Points {
 			e.Points = append(e.Points, scene.Point{X: p[0], Y: p[1], Z: p[2]})
 		}
-		for _, f := range m.Faces {
-			e.Faces = append(e.Faces, []int32{f[0], f[1], f[2]})
+		if len(m.Faces) >= len(m.Points)-2 {
+			// a complete TIN carried by the file
+			for _, f := range m.Faces {
+				e.Faces = append(e.Faces, []int32{f[0], f[1], f[2]})
+			}
+		} else if len(m.Points) >= 3 {
+			// incomplete or absent triangle table — triangulate the vertex
+			// set (generative enhancement, D150)
+			for _, tri := range delaunayTIN(m.Points) {
+				e.Faces = append(e.Faces, []int32{tri[0], tri[1], tri[2]})
+			}
 		}
 		out = append(out, e)
 	}
 	return out, nil
+}
+
+// delaunayTIN triangulates a vertex set with the flywave go-delaunay
+// library (pure Go Delaunay; D150 — replaces the hand-written
+// Bowyer-Watson whose cavity rebuild stranded interior vertices).
+func delaunayTIN(pts [][3]float64) [][3]int32 {
+	p := make([]delaunay.Point, len(pts))
+	for i, q := range pts {
+		p[i] = delaunay.Point{q[0], q[1]}
+	}
+	tri, err := delaunay.Triangulate(p)
+	if err != nil {
+		return nil
+	}
+	var out [][3]int32
+	for _, ids := range tri.GetTrianglesPointsMap() {
+		if len(ids) == 3 {
+			out = append(out, [3]int32{int32(ids[0]), int32(ids[1]), int32(ids[2])})
+		}
+	}
+	return out
 }
